@@ -465,6 +465,13 @@ else()
     message(STATUS "Did not find liborc and orcc, disabling orc support...")
 endif()
 
+########################################################################
+# Handle kissfft support
+########################################################################
+
+list(APPEND volk_sources kiss_fft_float.c)
+list(APPEND volk_sources kiss_fft_int32.c)
+list(APPEND volk_sources kiss_fft_int16.c)
 
 ########################################################################
 # Handle the generated constants

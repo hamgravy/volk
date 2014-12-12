@@ -26,6 +26,13 @@
 
 //VOLK_RUN_TESTS(volk_16i_x5_add_quad_16i_x4, 1e-4, 2046, 10000);
 //VOLK_RUN_TESTS(volk_16i_branch_4_state_8, 1e-4, 2046, 10000);
+
+VOLK_RUN_TESTS(volk_16ic_fftpuppet_16ic, 0, 0, 1024, 1);
+VOLK_RUN_TESTS(volk_16ic_ifftpuppet_16ic, 0, 0, 1024, 1);
+VOLK_RUN_TESTS(volk_32ic_fftpuppet_32ic, 0, 0, 1024, 1);
+VOLK_RUN_TESTS(volk_32ic_ifftpuppet_32ic, 0, 0, 1024, 1);
+VOLK_RUN_TESTS(volk_32fc_fftpuppet_32fc, 1e-5, 0, 1024, 1);
+VOLK_RUN_TESTS(volk_32fc_ifftpuppet_32fc, 1e-5, 0, 1024, 1);
 VOLK_RUN_TESTS(volk_16ic_s32f_deinterleave_real_32f, 1e-5, 32768.0, 20462, 1);
 VOLK_RUN_TESTS(volk_16ic_deinterleave_real_8i, 0, 0, 20462, 1);
 VOLK_RUN_TESTS(volk_16ic_deinterleave_16i_x2, 0, 0, 20462, 1);
