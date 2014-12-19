@@ -38,4 +38,14 @@ static inline void volk_32fc_ifftpuppet_32fc_generic(lv_32fc_t* outVector, const
 
 #endif /* LV_HAVE_GENERIC */
 
+#ifdef LV_HAVE_NEON
+
+static inline void volk_32fc_ifftpuppet_32fc_neon(lv_32fc_t* outVector, const lv_32fc_t* inVector, unsigned int num_points){
+
+    volk_32fc_8i_fft_32fc_neon(outVector, inVector, 1, num_points);
+    
+}
+
+#endif /* LV_HAVE_NEON */
+
 #endif /* INCLUDED_volk_32fc_ifftpuppet_32fc_a_H */

@@ -32,6 +32,7 @@
   \brief takes fft of aVector and stores it in cVector
   \param cVector The vector where the results will be stored
   \param aVector transform inputs
+  \param isinverse: 1=inverse transform on aVector, 0=forward transform
   \param num_points number of elements in the vector to be transformed (transform size)
 */
 static inline void volk_32fc_8i_fft_32fc_generic(lv_32fc_t* cVector, const lv_32fc_t* aVector, const char isinverse, unsigned int num_points){
@@ -55,9 +56,43 @@ static inline void volk_32fc_8i_fft_32fc_generic(lv_32fc_t* cVector, const lv_32
 		printf("%f+%fi;",(float)kout[ii].r,(float)kout[ii].i);
 	}
 	printf("];\n");
-*/ 
+*/
 }
 #endif /* LV_HAVE_GENERIC */
+
+#ifdef LV_HAVE_NEON
+#include <arm_neon.h>
+#include <Ne10/NE10.h>
+#include <Ne10/NE10_dsp.h>
+/*
+
+*/
+static inline void volk_32fc_8i_fft_32fc_neon(lv_32fc_t* cVector, const lv_32fc_t* aVector, const char isinverse, unsigned int num_points){
+    ne10_float32_t* in_neon = (ne10_float32_t*) aVector;
+    ne10_float32_t* out_neon = (ne10_float32_t*) cVector;    
+    ne10_fft_cfg_float32_t cfg = ne10_fft_alloc_c2c_float32(num_points);    
+    
+    ne10_fft_c2c_1d_float32_neon( (ne10_fft_cpx_float32_t*) out_neon, (ne10_fft_cpx_float32_t*) in_neon, cfg, (ne10_int32_t) isinverse);
+
+    NE10_FREE(cfg);
+/*
+    int ii;
+    printf("x=[");
+    for (ii=0; ii < num_points; ii++){
+        printf("%f+%fi;",(float)in_neon[ii*2],(float)in_neon[(ii*2)+1]);
+    }
+    printf("];\n");
+	
+    printf("y=[");
+    for (ii=0; ii < num_points; ii++){
+        printf("%f+%fi;",(float)out_neon[ii*2],(float)out_neon[(ii*2)+1]);
+    }
+    printf("];\n");
+*/
+}
+
+#endif /* LV_HAVE_NEON */
+
 
 #endif /* INCLUDED_volk_32fc_8i_fft_32fc_u_H */
 #ifndef INCLUDED_volk_32fc_8i_fft_32fc_a_H
