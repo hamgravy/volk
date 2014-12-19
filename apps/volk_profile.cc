@@ -175,8 +175,38 @@ int main(int argc, char *argv[]) {
 
     //VOLK_PROFILE(volk_16i_x5_add_quad_16i_x4, 1e-4, 2046, 10000, &results, benchmark_mode, kernel_regex);
     //VOLK_PROFILE(volk_16i_branch_4_state_8, 1e-4, 2046, 10000, &results, benchmark_mode, kernel_regex);
-    VOLK_PUPPET_PROFILE(volk_32fc_fftpuppet_32fc, volk_32fc_8i_fft_32fc, 0, 0, 1024, 14000, &results, benchmark_mode, kernel_regex);
-    VOLK_PUPPET_PROFILE(volk_32fc_ifftpuppet_32fc, volk_32fc_8i_fft_32fc, 0, 0, 1024, 14000, &results, benchmark_mode, kernel_regex);    
+
+    VOLK_PUPPET_PROFILE(volk_32fc_fftpuppet_32fc, volk_32fc_8i_fft_32fc, 1e-5, 0, 4, 14000, &results, benchmark_mode, kernel_regex);
+    VOLK_PUPPET_PROFILE(volk_32fc_ifftpuppet_32fc, volk_32fc_8i_fft_32fc, 1e-5, 0, 4, 14000, &results, benchmark_mode, kernel_regex);    
+
+    VOLK_PUPPET_PROFILE(volk_32fc_fftpuppet_32fc, volk_32fc_8i_fft_32fc, 1e-5, 0, 8, 14000, &results, benchmark_mode, kernel_regex);
+    VOLK_PUPPET_PROFILE(volk_32fc_ifftpuppet_32fc, volk_32fc_8i_fft_32fc, 1e-5, 0, 8, 14000, &results, benchmark_mode, kernel_regex);    
+
+    VOLK_PUPPET_PROFILE(volk_32fc_fftpuppet_32fc, volk_32fc_8i_fft_32fc, 1e-5, 0, 16, 14000, &results, benchmark_mode, kernel_regex);
+    VOLK_PUPPET_PROFILE(volk_32fc_ifftpuppet_32fc, volk_32fc_8i_fft_32fc, 1e-5, 0, 16, 14000, &results, benchmark_mode, kernel_regex);
+
+    VOLK_PUPPET_PROFILE(volk_32fc_fftpuppet_32fc, volk_32fc_8i_fft_32fc, 1e-5, 0, 32, 14000, &results, benchmark_mode, kernel_regex);
+    VOLK_PUPPET_PROFILE(volk_32fc_ifftpuppet_32fc, volk_32fc_8i_fft_32fc, 1e-5, 0, 32, 14000, &results, benchmark_mode, kernel_regex);        
+
+    VOLK_PUPPET_PROFILE(volk_32fc_fftpuppet_32fc, volk_32fc_8i_fft_32fc, 1e-5, 0, 64, 14000, &results, benchmark_mode, kernel_regex);
+    VOLK_PUPPET_PROFILE(volk_32fc_ifftpuppet_32fc, volk_32fc_8i_fft_32fc, 1e-5, 0, 64, 14000, &results, benchmark_mode, kernel_regex);    
+
+    VOLK_PUPPET_PROFILE(volk_32fc_fftpuppet_32fc, volk_32fc_8i_fft_32fc, 1e-5, 0, 128, 14000, &results, benchmark_mode, kernel_regex);
+    VOLK_PUPPET_PROFILE(volk_32fc_ifftpuppet_32fc, volk_32fc_8i_fft_32fc, 1e-5, 0, 128, 14000, &results, benchmark_mode, kernel_regex);    
+
+    VOLK_PUPPET_PROFILE(volk_32fc_fftpuppet_32fc, volk_32fc_8i_fft_32fc, 1e-5, 0, 256, 14000, &results, benchmark_mode, kernel_regex);
+    VOLK_PUPPET_PROFILE(volk_32fc_ifftpuppet_32fc, volk_32fc_8i_fft_32fc, 1e-5, 0, 256, 14000, &results, benchmark_mode, kernel_regex);    
+
+    VOLK_PUPPET_PROFILE(volk_32fc_fftpuppet_32fc, volk_32fc_8i_fft_32fc, 1e-5, 0, 512, 14000, &results, benchmark_mode, kernel_regex);
+    VOLK_PUPPET_PROFILE(volk_32fc_ifftpuppet_32fc, volk_32fc_8i_fft_32fc, 1e-5, 0, 512, 14000, &results, benchmark_mode, kernel_regex);
+
+    VOLK_PUPPET_PROFILE(volk_32fc_fftpuppet_32fc, volk_32fc_8i_fft_32fc, 1e-5, 0, 1024, 14000, &results, benchmark_mode, kernel_regex);
+    VOLK_PUPPET_PROFILE(volk_32fc_ifftpuppet_32fc, volk_32fc_8i_fft_32fc, 1e-5, 0, 1024, 14000, &results, benchmark_mode, kernel_regex);        
+
+    VOLK_PUPPET_PROFILE(volk_32fc_fftpuppet_32fc, volk_32fc_8i_fft_32fc, 1e-5, 0, 2048, 14000, &results, benchmark_mode, kernel_regex);
+    VOLK_PUPPET_PROFILE(volk_32fc_ifftpuppet_32fc, volk_32fc_8i_fft_32fc, 1e-5, 0, 2048, 14000, &results, benchmark_mode, kernel_regex);        
+
+
     VOLK_PUPPET_PROFILE(volk_32ic_fftpuppet_32ic, volk_32ic_8i_fft_32ic, 0, 0, 1024, 14000, &results, benchmark_mode, kernel_regex);
     VOLK_PUPPET_PROFILE(volk_32ic_ifftpuppet_32ic, volk_32ic_8i_fft_32ic, 0, 0, 1024, 14000, &results, benchmark_mode, kernel_regex);    
     VOLK_PUPPET_PROFILE(volk_16ic_fftpuppet_16ic, volk_16ic_8i_fft_16ic, 0, 0, 1024, 14000, &results, benchmark_mode, kernel_regex);
