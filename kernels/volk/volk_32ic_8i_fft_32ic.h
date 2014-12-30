@@ -31,10 +31,7 @@
 #ifdef LV_HAVE_GENERIC
 #include <kissfft/kissfft_int32/kiss_fft_int32.h>
 /*!
-  \brief takes fft of aVector and stores it in cVector
-  \param cVector The vector where the results will be stored
-  \param aVector transform inputs
-  \param num_points number of elements in the vector to be transformed (transform size)
+
 */
 static inline void volk_32ic_8i_fft_32ic_generic(lv_32sc_t* cVector, const lv_32sc_t* aVector, const char isinverse, unsigned int num_points){
     kiss_fft_cfg_int32 cfg	    = NULL;
@@ -44,22 +41,56 @@ static inline void volk_32ic_8i_fft_32ic_generic(lv_32sc_t* cVector, const lv_32
     cfg = kiss_fft_alloc_int32(num_points,isinverse,0,0);	
 	kiss_fft_int32(cfg, tbuf, kout);	
 	free(cfg);
-/*
+	/*
     int ii;
     printf("x=[");
 	for (ii=0; ii < num_points; ii++){
 		printf("%d+%di;",(int32_t)tbuf[ii].r,(int32_t)tbuf[ii].i);
 	}
 	printf("];\n");
-	
+
 	printf("y=[");
 	for (ii=0; ii < num_points; ii++){
 		printf("%d+%di;",(int32_t)kout[ii].r,(int32_t)kout[ii].i);
 	}
 	printf("];\n");
-*/		 
+	*/	 
 }
 #endif /* LV_HAVE_GENERIC */
+
+#ifdef LV_HAVE_NEON
+#include <arm_neon.h>
+#include <Ne10/NE10.h>
+#include <Ne10/NE10_dsp.h>
+/*
+
+*/
+static inline void volk_32ic_8i_fft_32ic_neon(lv_32sc_t* cVector, const lv_32sc_t* aVector, const char isinverse, unsigned int num_points){
+    ne10_int32_t* in_neon = (ne10_int32_t*) aVector;
+    ne10_int32_t* out_neon = (ne10_int32_t*) cVector;    
+    ne10_fft_cfg_int32_t cfg = ne10_fft_alloc_c2c_int32(num_points);    
+    ne10_int32_t isscaled = 1;
+   
+    ne10_fft_c2c_1d_int32_neon( (ne10_fft_cpx_int32_t*) out_neon, (ne10_fft_cpx_int32_t*) in_neon, cfg, (ne10_int32_t) isinverse, isscaled);
+
+    NE10_FREE(cfg);
+	/*
+    int ii;
+    printf("x=[");
+    for (ii=0; ii < num_points; ii++){
+        printf("%d+%di;",(int32_t)in_neon[ii*2],(int32_t)in_neon[(ii*2)+1]);
+    }
+    printf("];\n");
+
+    printf("y=[");
+    for (ii=0; ii < num_points; ii++){
+        printf("%d+%di;",(int32_t)out_neon[ii*2],(int32_t)out_neon[(ii*2)+1]);
+    }
+    printf("];\n");
+    */
+}
+
+#endif /* LV_HAVE_NEON */
 
 #endif /* INCLUDED_volk_32ic_8i_fft_32ic_u_H */
 #ifndef INCLUDED_volk_32ic_8i_fft_32ic_a_H
@@ -70,11 +101,8 @@ static inline void volk_32ic_8i_fft_32ic_generic(lv_32sc_t* cVector, const lv_32
 
 #ifdef LV_HAVE_GENERIC
 #include <kissfft/kissfft_int32/kiss_fft_int32.h>
-/*!
-  \brief takes fft of aVector and stores it in cVector
-  \param cVector The vector where the results will be stored
-  \param aVector transform inputs
-  \param num_points number of elements in the vector to be transformed (transform size)
+/*
+
 */
 static inline void volk_32ic_8i_fft_32ic_a_generic(lv_32sc_t* cVector, const lv_32sc_t* aVector, const char isinverse, unsigned int num_points){
     kiss_fft_cfg_int32 cfg	    = NULL;
