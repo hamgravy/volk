@@ -29,34 +29,26 @@
 #ifdef LV_HAVE_GENERIC
 #include <kissfft/kissfft_float/kiss_fft_float.h>
 /*!
-  \brief takes fft of aVector and stores it in cVector
-  \param cVector The vector where the results will be stored
-  \param aVector transform inputs
-  \param isinverse: 1=inverse transform on aVector, 0=forward transform
-  \param num_points number of elements in the vector to be transformed (transform size)
+
 */
 static inline void volk_32fc_8i_fft_32fc_generic(lv_32fc_t* cVector, const lv_32fc_t* aVector, const char isinverse, unsigned int num_points){
-    kiss_fft_cfg_float cfg	    = NULL;
-    kiss_fft_cpx_float *kout	= (kiss_fft_cpx_float*) cVector;
-    kiss_fft_cpx_float *tbuf    = (kiss_fft_cpx_float*) aVector;
-	
-    cfg = kiss_fft_alloc_float(num_points , isinverse, 0, 0);	
+    kiss_fft_cpx_float *kout = (kiss_fft_cpx_float*) cVector;
+    kiss_fft_cpx_float *tbuf = (kiss_fft_cpx_float*) aVector;
+    static unsigned int num_points_old = 0;
+    static char isinverse_old = 0;
+    static kiss_fft_cfg_float cfg = NULL;
+
+    if ((num_points_old != num_points) || (isinverse_old != isinverse)){
+        num_points_old = num_points;
+        isinverse_old = isinverse;
+        if (cfg != NULL){
+            free(cfg);
+        }
+        cfg = kiss_fft_alloc_float(num_points, isinverse, 0, 0);
+    }  
+
 	kiss_fft_float(cfg, tbuf, kout);	
-	free(cfg);
-/*
-    int ii;
-    printf("x=[");
-	for (ii=0; ii < num_points; ii++){
-		printf("%f+%fi;",(float)tbuf[ii].r,(float)tbuf[ii].i);
-	}
-	printf("];\n");
-	
-	printf("y=[");
-	for (ii=0; ii < num_points; ii++){
-		printf("%f+%fi;",(float)kout[ii].r,(float)kout[ii].i);
-	}
-	printf("];\n");
-*/
+
 }
 #endif /* LV_HAVE_GENERIC */
 
@@ -70,25 +62,17 @@ static inline void volk_32fc_8i_fft_32fc_generic(lv_32fc_t* cVector, const lv_32
 static inline void volk_32fc_8i_fft_32fc_neon(lv_32fc_t* cVector, const lv_32fc_t* aVector, const char isinverse, unsigned int num_points){
     ne10_float32_t* in_neon = (ne10_float32_t*) aVector;
     ne10_float32_t* out_neon = (ne10_float32_t*) cVector;    
-    ne10_fft_cfg_float32_t cfg = ne10_fft_alloc_c2c_float32(num_points);    
+    static ne10_fft_cfg_float32_t cfg = NULL;  
+
+    if (cfg == NULL){
+        cfg = ne10_fft_alloc_c2c_float32(num_points);
+    }else if (cfg->nfft != num_points){
+        NE10_FREE(cfg);    
+        cfg = ne10_fft_alloc_c2c_float32(num_points);
+    }  
     
     ne10_fft_c2c_1d_float32_neon( (ne10_fft_cpx_float32_t*) out_neon, (ne10_fft_cpx_float32_t*) in_neon, cfg, (ne10_int32_t) isinverse);
 
-    NE10_FREE(cfg);
-/*
-    int ii;
-    printf("x=[");
-    for (ii=0; ii < num_points; ii++){
-        printf("%f+%fi;",(float)in_neon[ii*2],(float)in_neon[(ii*2)+1]);
-    }
-    printf("];\n");
-	
-    printf("y=[");
-    for (ii=0; ii < num_points; ii++){
-        printf("%f+%fi;",(float)out_neon[ii*2],(float)out_neon[(ii*2)+1]);
-    }
-    printf("];\n");
-*/
 }
 
 #endif /* LV_HAVE_NEON */
@@ -104,33 +88,26 @@ static inline void volk_32fc_8i_fft_32fc_neon(lv_32fc_t* cVector, const lv_32fc_
 #ifdef LV_HAVE_GENERIC
 #include <kissfft/kissfft_float/kiss_fft_float.h>
 /*!
-  \brief takes fft of aVector and stores it in cVector
-  \param cVector The vector where the results will be stored
-  \param aVector transform inputs
-  \param num_points number of elements in the vector to be transformed (transform size)
+
 */
 static inline void volk_32fc_8i_fft_32fc_a_generic(lv_32fc_t* cVector, const lv_32fc_t* aVector, const char isinverse, unsigned int num_points){
-    kiss_fft_cfg_float cfg	    = NULL;
-    kiss_fft_cpx_float *kout	= (kiss_fft_cpx_float*) cVector;
-    kiss_fft_cpx_float *tbuf    = (kiss_fft_cpx_float*) aVector;
-	
-    cfg = kiss_fft_alloc_float(num_points , isinverse, 0, 0);	
-	kiss_fft_float(cfg, tbuf, kout);	
-	free(cfg);
-/*
-    int ii;
-    printf("x=[");
-	for (ii=0; ii < num_points; ii++){
-		printf("%f+%fi;",(float)tbuf[ii].r,(float)tbuf[ii].i);
-	}
-	printf("];\n");
-	
-	printf("y=[");
-	for (ii=0; ii < num_points; ii++){
-		printf("%f+%fi;",(float)kout[ii].r,(float)kout[ii].i);
-	}
-	printf("];\n");
-*/ 
+    kiss_fft_cpx_float *kout = (kiss_fft_cpx_float*) cVector;
+    kiss_fft_cpx_float *tbuf = (kiss_fft_cpx_float*) aVector;
+    static unsigned int num_points_old = 0;
+    static char isinverse_old = 0;
+    static kiss_fft_cfg_float cfg = NULL;
+
+    if ((num_points_old != num_points) || (isinverse_old != isinverse)){
+        num_points_old = num_points;
+        isinverse_old = isinverse;
+        if (cfg != NULL){
+            free(cfg);
+        }
+        cfg = kiss_fft_alloc_float(num_points, isinverse, 0, 0);
+    }  
+
+	kiss_fft_float(cfg, tbuf, kout);
+
 }
 #endif /* LV_HAVE_GENERIC */
 

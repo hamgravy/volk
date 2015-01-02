@@ -487,6 +487,10 @@ list(APPEND volk_sources NE10_fft_int32.c)
 list(APPEND volk_sources NE10_fft_int32.neon.c)
 list(APPEND volk_sources NE10_fft_int32.neon.s)
 
+list(APPEND volk_sources NE10_fft_int16.c)
+list(APPEND volk_sources NE10_fft_int16.neon.c)
+list(APPEND volk_sources NE10_fft_int16.neon.s)
+
 ########################################################################
 # Handle the generated constants
 ########################################################################

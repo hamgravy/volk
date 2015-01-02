@@ -31,11 +31,51 @@
 #ifdef LV_HAVE_GENERIC
 
 static inline void volk_16ic_fftpuppet_16ic_generic(lv_16sc_t* outVector, const lv_16sc_t* inVector, unsigned int num_points){
+    int16_t* in_generic = (int16_t*) inVector;
+    static int16_t* in_scaled = NULL;
+    static unsigned int num_points_old = 0;
+    int ii;        
+ 
+    if (num_points != num_points_old){
+        num_points_old = num_points;        
+        if(in_scaled != NULL){
+            free(in_scaled);    
+        }
+        in_scaled = (int16_t*) malloc (num_points * 2 *  sizeof (int16_t));       
+        for(ii = 0; ii < num_points*2; ii++){
+            in_scaled[ii] = in_generic[ii] >> 1;
+        }
+    }
 
-    volk_16ic_8i_fft_16ic_generic(outVector, inVector, 0, num_points);
-    
+    volk_16ic_8i_fft_16ic_generic(outVector, (lv_16sc_t*)in_scaled, 0, num_points);
 }
 
 #endif /* LV_HAVE_GENERIC */
+
+#ifdef LV_HAVE_NEON
+
+static inline void volk_16ic_fftpuppet_16ic_neon(lv_16sc_t* outVector, const lv_16sc_t* inVector, unsigned int num_points){
+    ne10_int16_t* in_neon = (ne10_int16_t*) inVector;
+    static ne10_int16_t* in_scaled = NULL;
+    static unsigned int num_points_old = 0;
+    int ii;
+
+    if (num_points != num_points_old){
+        num_points_old = num_points;  
+      
+        if(in_scaled != NULL){
+            free(in_scaled);    
+        }
+        in_scaled = (ne10_int16_t*) malloc (num_points * 2 *  sizeof (ne10_int16_t));       
+        for(ii = 0; ii < num_points*2; ii++){
+            in_scaled[ii] = in_neon[ii] >> 1;
+        }
+    }
+
+    volk_16ic_8i_fft_16ic_neon(outVector, (lv_16sc_t*)in_scaled, 0, num_points);   
+
+}
+
+#endif /* LV_HAVE_NEON */
 
 #endif /* INCLUDED_volk_16ic_fftpuppet_16ic_a_H */
