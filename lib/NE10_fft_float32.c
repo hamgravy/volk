@@ -1020,6 +1020,7 @@ ne10_fft_cfg_float32_t ne10_fft_alloc_c2c_float32 (ne10_int32_t nfft)
         if (result == NE10_ERR)
         {
             NE10_FREE (st);
+            st = NULL;
             return st;
         }
 
