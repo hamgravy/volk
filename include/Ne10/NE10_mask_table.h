@@ -1,5 +1,5 @@
 /*
- *  Copyright 2011-14 ARM Limited and Contributors.
+ *  Copyright 2012-14 ARM Limited and Contributors.
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -25,33 +25,28 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "NE10.h"
+/*
+ * NE10 Library : common/NE10_mask_table.h
+ */
 
-#ifndef NE10_init_H
-#define NE10_init_H
+#include "NE10_types.h"
+#ifndef _ARM_MASK_TABLE_H
+#define _ARM_MASK_TABLE_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#define Q_MASK_TABLE_SIZE        20
+#define D_MASK_TABLE_SIZE        6
+#define DIV_LOOKUP_TABLE_SIZE    255
 
-    /*!
-        This routine returns NE10_OK if the running platform supports NEON, otherwise it returns NE10_ERR
-     */
-    extern ne10_result_t ne10_HasNEON();
+/* mask table for dsp module */
+extern const ne10_uint32_t ne10_qMaskTable32[Q_MASK_TABLE_SIZE] asm ("ne10_qMaskTable32");
+extern const ne10_uint32_t ne10_dMaskTable32[D_MASK_TABLE_SIZE] asm ("ne10_dMaskTable32");
+extern const ne10_uint32_t ne10_divLookUpTable[DIV_LOOKUP_TABLE_SIZE] \
+asm ("ne10_divLookUpTable");
 
-    /*!
-        This routine initializes all the function pointers.
-     */
-    extern ne10_result_t ne10_init();
-
-    /*!
-        This routine initializes all the math function pointers defined in "NE10_math.h" with pointers to ARM NEON or ARM VFP implementations.
-     */
-    extern ne10_result_t ne10_init_math (ne10_int32_t is_NEON_available);
-    extern ne10_result_t ne10_init_dsp (ne10_int32_t is_NEON_available);
-
-#ifdef __cplusplus
-}
-#endif
+/* mask table for imgproc module */
+#define NE10_VRESIZE_LINEAR_MASK_TABLE_SIZE    7
+extern const ne10_uint64_t ne10_img_vresize_linear_mask_residual_table[NE10_VRESIZE_LINEAR_MASK_TABLE_SIZE] \
+asm ("ne10_vresize_mask_residual_table");
 
 #endif
+

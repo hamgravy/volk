@@ -1,5 +1,5 @@
 /*
- *  Copyright 2011-14 ARM Limited and Contributors.
+ *  Copyright 2014 ARM Limited
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -16,7 +16,7 @@
  *  THIS SOFTWARE IS PROVIDED BY ARM LIMITED AND CONTRIBUTORS "AS IS" AND
  *  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  *  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- *  DISCLAIMED. IN NO EVENT SHALL ARM LIMITED AND CONTRIBUTORS BE LIABLE FOR ANY
+ *  DISCLAIMED. IN NO EVENT SHALL ARM LIMITED BE LIABLE FOR ANY
  *  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
  *  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
  *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -25,33 +25,37 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "NE10.h"
+/*
+ * NE10 Library : dsp/NE10_fft_common_varibles.h
+ */
 
-#ifndef NE10_init_H
-#define NE10_init_H
+#include "NE10_types.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#ifndef NE10_FFT_COMMON_VARIBLES_H
+#define NE10_FFT_COMMON_VARIBLES_H
 
-    /*!
-        This routine returns NE10_OK if the running platform supports NEON, otherwise it returns NE10_ERR
-     */
-    extern ne10_result_t ne10_HasNEON();
+///////////////////////////
+// common varibles
+///////////////////////////
 
-    /*!
-        This routine initializes all the function pointers.
-     */
-    extern ne10_result_t ne10_init();
+/* Twiddles used in Radix-8 FFT */
+const static ne10_float32_t TW_81_F32  =  0.70710678; // sqrt (2) / 2
+const static ne10_float32_t TW_81N_F32 = -0.70710678; // - TW_81_F32
 
-    /*!
-        This routine initializes all the math function pointers defined in "NE10_math.h" with pointers to ARM NEON or ARM VFP implementations.
-     */
-    extern ne10_result_t ne10_init_math (ne10_int32_t is_NEON_available);
-    extern ne10_result_t ne10_init_dsp (ne10_int32_t is_NEON_available);
+/* Twiddles used in Radix-5 FFT */
+const static ne10_fft_cpx_float32_t TW_5A_F32 =
+        {
+             0.309016994374947, //   cos (2 * pi / 5)
+            -0.951056516295154  // - sin (2 * pi / 5)
+        };
+const static ne10_fft_cpx_float32_t TW_5B_F32 =
+        {
+            -0.809016994374947, //   cos (4 * pi / 5)
+            -0.587785252292473  // - sin (4 * pi / 5)
+        };
 
-#ifdef __cplusplus
-}
-#endif
+/* Twiddles used in Radix-3 FFT */
+const static ne10_float32_t TW_3I_F32  =   0.866025403784439; // sqrt (3) / 2
+const static ne10_float32_t TW_3IN_F32 = - 0.866025403784439; // - TW_3IN_F32
 
-#endif
+#endif // NE10_FFT_COMMON_VARIBLES_H

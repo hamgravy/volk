@@ -1,5 +1,5 @@
 /*
- *  Copyright 2013-14 ARM Limited
+ *  Copyright 2013-14 ARM Limited and Contributors.
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -16,7 +16,7 @@
  *  THIS SOFTWARE IS PROVIDED BY ARM LIMITED AND CONTRIBUTORS "AS IS" AND
  *  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  *  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- *  DISCLAIMED. IN NO EVENT SHALL ARM LIMITED BE LIABLE FOR ANY
+ *  DISCLAIMED. IN NO EVENT SHALL ARM LIMITED AND CONTRIBUTORS BE LIABLE FOR ANY
  *  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
  *  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
  *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -34,6 +34,7 @@
 #include <Ne10/NE10_types.h>
 #include <Ne10/NE10_macros.h>
 #include <Ne10/NE10_fft.h>
+#include <Ne10/NE10_dsp.h>
 
 static inline void ne10_fft4_forward_float32 (ne10_fft_cpx_float32_t * Fout,
         ne10_fft_cpx_float32_t * Fin)
@@ -80,25 +81,11 @@ static inline void ne10_fft4_backward_float32 (ne10_fft_cpx_float32_t * Fout,
 
     s1_r = Fin[1].r - Fin[3].r;
     s1_i = Fin[1].i - Fin[3].i;
-    //ESB: the 0.25f scaling factors make an 4pt. ifft does not "undo" a 4pt. fft
-/*
-    Fout[2].r = (tmp_r - s0_r) * 0.25f;
-    Fout[2].i = (tmp_i - s0_i) * 0.25f;
-    Fout[0].r = (tmp_r + s0_r) * 0.25f;
-    Fout[0].i = (tmp_i + s0_i) * 0.25f;
-*/
     Fout[2].r = (tmp_r - s0_r);
     Fout[2].i = (tmp_i - s0_i);
     Fout[0].r = (tmp_r + s0_r);
     Fout[0].i = (tmp_i + s0_i);
 
-    //ESB: the 0.25f scaling factors make an 4pt. ifft does not "undo" a 4pt. fft
-/*
-    Fout[1].r = (s2_r - s1_i) * 0.25f;
-    Fout[1].i = (s2_i + s1_r) * 0.25f;
-    Fout[3].r = (s2_r + s1_i) * 0.25f;
-    Fout[3].i = (s2_i - s1_r) * 0.25f;
-*/
     Fout[1].r = (s2_r - s1_i);
     Fout[1].i = (s2_i + s1_r);
     Fout[3].r = (s2_r + s1_i);
@@ -202,18 +189,6 @@ static inline void ne10_fft8_backward_float32 (ne10_fft_cpx_float32_t * Fout,
     t2_i = s2_i + s6_i;
     t3_r = s2_r - s6_r;
     t3_i = s2_i - s6_i;
-    //ESB: the 0.125f scaling factors make an 8pt. ifft does not "undo" an 8pt. fft
-/*
-    Fout[0].r = (t1_r + t2_r) * 0.125f;
-    Fout[0].i = (t1_i + t2_i) * 0.125f;
-    Fout[4].r = (t1_r - t2_r) * 0.125f;
-    Fout[4].i = (t1_i - t2_i) * 0.125f;
-    Fout[2].r = (t0_r - t3_i) * 0.125f;
-    Fout[2].i = (t0_i + t3_r) * 0.125f;
-    Fout[6].r = (t0_r + t3_i) * 0.125f;
-    Fout[6].i = (t0_i - t3_r) * 0.125f;
-*/
-    //ESB: removed the scaling from above...
     Fout[0].r = (t1_r + t2_r);
     Fout[0].i = (t1_i + t2_i);
     Fout[4].r = (t1_r - t2_r);
@@ -236,18 +211,6 @@ static inline void ne10_fft8_backward_float32 (ne10_fft_cpx_float32_t * Fout,
     t2_i = t4_i - t5_i;
     t3_r = t4_r + t5_r;
     t3_i = t4_i + t5_i;
-    //ESB: the 0.125f scaling factors make an 8pt. ifft does not "undo" an 8pt. fft
-/*
-    Fout[1].r = (t1_r + t2_r) * 0.125f;
-    Fout[1].i = (t1_i + t2_i) * 0.125f;
-    Fout[5].r = (t1_r - t2_r) * 0.125f;
-    Fout[5].i = (t1_i - t2_i) * 0.125f;
-    Fout[3].r = (t0_r - t3_i) * 0.125f;
-    Fout[3].i = (t0_i + t3_r) * 0.125f;
-    Fout[7].r = (t0_r + t3_i) * 0.125f;
-    Fout[7].i = (t0_i - t3_r) * 0.125f;
-*/
-    //ESB: removed the scaling from above...
     Fout[1].r = (t1_r + t2_r);
     Fout[1].i = (t1_i + t2_i);
     Fout[5].r = (t1_r - t2_r);
@@ -256,7 +219,6 @@ static inline void ne10_fft8_backward_float32 (ne10_fft_cpx_float32_t * Fout,
     Fout[3].i = (t0_i + t3_r);
     Fout[7].r = (t0_r + t3_i);
     Fout[7].i = (t0_i - t3_r);
-
 }
 
 static void ne10_fft16_forward_float32_neon (ne10_fft_cpx_float32_t * Fout,
@@ -425,8 +387,6 @@ static void ne10_fft16_backward_float32_neon (ne10_fft_cpx_float32_t * Fout,
     float32x4_t q_in_i0123, q_in_i4567, q_in_i89ab, q_in_icdef;
     float32x4x2_t q2_tw1, q2_tw2, q2_tw3;
     float32x4x2_t q2_out_0123, q2_out_4567, q2_out_89ab, q2_out_cdef;
-    // ESB:    
-    // float32x4_t q_one_by_nfft;
     tw1 = twiddles;
     tw2 = twiddles + 4;
     tw3 = twiddles + 8;
@@ -476,8 +436,6 @@ static void ne10_fft16_backward_float32_neon (ne10_fft_cpx_float32_t * Fout,
     q_s4_r = vsubq_f32 (q_s0_r, q_s2_r);
     q_s4_i = vsubq_f32 (q_s0_i, q_s2_i);
 
-    //ESB: with the 0.0625f scaling factor, a 16pt. ifft does not "undo" a 16pt. fft 
-    //q_one_by_nfft = vdupq_n_f32 (0.0625f);
     q2_out_89ab.val[0] = vsubq_f32 (q2_out_0123.val[0], q_s3_r);
     q2_out_89ab.val[1] = vsubq_f32 (q2_out_0123.val[1], q_s3_i);
     q2_out_0123.val[0] = vaddq_f32 (q2_out_0123.val[0], q_s3_r);
@@ -488,17 +446,6 @@ static void ne10_fft16_backward_float32_neon (ne10_fft_cpx_float32_t * Fout,
     q2_out_cdef.val[0] = vaddq_f32 (q_s5_r, q_s4_i);
     q2_out_cdef.val[1] = vsubq_f32 (q_s5_i, q_s4_r);
 
-    //ESB: with the 0.0625f scaling factor, a 16pt. ifft does not "undo" a 16pt. fft 
-/*
-    q2_out_89ab.val[0] = vmulq_f32 (q2_out_89ab.val[0], q_one_by_nfft);
-    q2_out_89ab.val[1] = vmulq_f32 (q2_out_89ab.val[1], q_one_by_nfft);
-    q2_out_0123.val[0] = vmulq_f32 (q2_out_0123.val[0], q_one_by_nfft);
-    q2_out_0123.val[1] = vmulq_f32 (q2_out_0123.val[1], q_one_by_nfft);
-    q2_out_4567.val[0] = vmulq_f32 (q2_out_4567.val[0], q_one_by_nfft);
-    q2_out_4567.val[1] = vmulq_f32 (q2_out_4567.val[1], q_one_by_nfft);
-    q2_out_cdef.val[0] = vmulq_f32 (q2_out_cdef.val[0], q_one_by_nfft);
-    q2_out_cdef.val[1] = vmulq_f32 (q2_out_cdef.val[1], q_one_by_nfft);
-*/
     vst2q_f32 (p_dst0, q2_out_0123);
     vst2q_f32 (p_dst1, q2_out_4567);
     vst2q_f32 (p_dst2, q2_out_89ab);
@@ -704,13 +651,13 @@ static void ne10_fft_split_c2r_1d_float32_neon (ne10_fft_cpx_float32_t *dst,
  */
 
 /**
- * @brief Mixed radix-2/4 complex FFT/IFFT of float(32-bit) data.
+ * @brief Mixed radix-2/3/4/5 complex FFT/IFFT of float(32-bit) data.
  * @param[out]  *fout            point to the output buffer (out-of-place)
  * @param[in]   *fin             point to the input buffer (out-of-place)
  * @param[in]   cfg              point to the config struct
  * @param[in]   inverse_fft      the flag of IFFT, 0: FFT, 1: IFFT
  * @return none.
- * The function implements a mixed radix-2/4 complex FFT/IFFT. The length of 2^N(N is 1, 2, 3, 4, 5, 6 ....etc) is supported.
+ * The function implements a mixed radix-2/3/4/5 complex FFT/IFFT. The length of 2^N*3^M*5^K(N,M,K are 1, 2, 3, 4, 5, 6 ....etc, and length >= 4) is supported.
  * Otherwise, this FFT is an out-of-place algorithm. When you want to get an in-place FFT, it creates a temp buffer as
  *  output buffer and then copies the temp buffer back to input buffer. For the usage of this function, please check test/test_suite_fft_float32.c
  */
@@ -720,6 +667,31 @@ void ne10_fft_c2c_1d_float32_neon (ne10_fft_cpx_float32_t *fout,
                                    ne10_fft_cfg_float32_t cfg,
                                    ne10_int32_t inverse_fft)
 {
+    ne10_int32_t stage_count = cfg->factors[0];
+    ne10_int32_t algorithm_flag = cfg->factors[2 * (stage_count + 1)];
+
+    assert ((algorithm_flag == NE10_FFT_ALG_24)
+            || (algorithm_flag == NE10_FFT_ALG_ANY));
+
+    // For NE10_FFT_ALG_ANY.
+    // Function will return inside this branch.
+    if (algorithm_flag == NE10_FFT_ALG_ANY)
+    {
+        if (inverse_fft)
+        {
+            ne10_mixed_radix_generic_butterfly_inverse_float32_neon (fout, fin,
+                    cfg->factors, cfg->twiddles, cfg->buffer);
+        }
+        else
+        {
+            ne10_mixed_radix_generic_butterfly_float32_neon (fout, fin,
+                    cfg->factors, cfg->twiddles, cfg->buffer);
+        }
+        return;
+    }
+
+    // Since function goes pass assertion and skips branch above, algorithm_flag
+    // must be NE10_FFT_ALG_24.
     if (inverse_fft)
     {
         switch (cfg->nfft)

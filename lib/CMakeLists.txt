@@ -477,11 +477,14 @@ list(APPEND volk_sources kiss_fft_int16.c)
 # Handle Ne10 support
 ########################################################################
 
+#list(APPEND volk_sources NE10_init_dsp.c)
+
 list(APPEND volk_sources NE10_fft.c)
 
 list(APPEND volk_sources NE10_fft_float32.c)
 list(APPEND volk_sources NE10_fft_float32.neon.c)
 list(APPEND volk_sources NE10_fft_float32.neon.s)
+list(APPEND volk_sources NE10_fft_generic_float32.c)
 
 list(APPEND volk_sources NE10_fft_int32.c)
 list(APPEND volk_sources NE10_fft_int32.neon.c)
@@ -490,6 +493,14 @@ list(APPEND volk_sources NE10_fft_int32.neon.s)
 list(APPEND volk_sources NE10_fft_int16.c)
 list(APPEND volk_sources NE10_fft_int16.neon.c)
 list(APPEND volk_sources NE10_fft_int16.neon.s)
+
+list(APPEND volk_sources NE10_iir.c)
+list(APPEND volk_sources NE10_iir.neon.s)
+list(APPEND volk_sources NE10_fir.c)
+list(APPEND volk_sources NE10_fir.neon.s)
+
+list(APPEND volk_sources NE10_mask_table.c)
+list(APPEND volk_sources NE10_fft_generic_float32.neonintrinsic.cpp)
 
 ########################################################################
 # Handle the generated constants

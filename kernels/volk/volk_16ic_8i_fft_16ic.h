@@ -67,15 +67,19 @@ static inline void volk_16ic_8i_fft_16ic_neon(lv_16sc_t* cVector, const lv_16sc_
     static unsigned int num_points_old = 0;
     const ne10_int32_t isscaled = 1;
 
+    const bool use_neon = ((num_points != 0) && ((num_points & (~num_points + 1)) == num_points));
+
     if (num_points_old != num_points){
         num_points_old = num_points;
-        if (cfg!=NULL){
-            NE10_FREE(cfg);    
+        if (use_neon){
+            if (cfg!=NULL){
+                NE10_FREE(cfg);    
+            }
+            cfg = ne10_fft_alloc_c2c_int16(num_points); 
         }
-        cfg = ne10_fft_alloc_c2c_int16(num_points); // returns NULL if a non-power-of-two transform size is requested
     }
-    
-    if (cfg == NULL){ 
+
+    if (!use_neon){ 
         volk_16ic_8i_fft_16ic_generic(cVector, aVector, isinverse, num_points);
     }else{
         ne10_fft_c2c_1d_int16_neon( (ne10_fft_cpx_int16_t*) out_neon, (ne10_fft_cpx_int16_t*) in_neon, cfg, (ne10_int16_t) isinverse, isscaled);

@@ -56,6 +56,7 @@ static inline void volk_32fc_8i_fft_32fc_generic(lv_32fc_t* cVector, const lv_32
 #include <arm_neon.h>
 #include <Ne10/NE10.h>
 #include <Ne10/NE10_dsp.h>
+
 /*
 
 */
@@ -65,15 +66,20 @@ static inline void volk_32fc_8i_fft_32fc_neon(lv_32fc_t* cVector, const lv_32fc_
     static ne10_fft_cfg_float32_t cfg = NULL;  
     static unsigned int num_points_old = 0;
 
+    //const bool use_neon = ((num_points != 0) && ((num_points & (~num_points + 1)) == num_points));
+    const bool use_neon = (num_points % 4 == 0); // not actually faster
+
     if (num_points_old != num_points){
         num_points_old = num_points;
-        if (cfg!=NULL){
-            NE10_FREE(cfg);    
+        if (use_neon){
+            if (cfg!=NULL){
+                NE10_FREE(cfg);    
+            }
+            cfg = ne10_fft_alloc_c2c_float32_neon(num_points); 
         }
-        cfg = ne10_fft_alloc_c2c_float32(num_points); // returns NULL if a non-power-of-two transform size is requested
     }
 
-    if (cfg == NULL){ 
+    if (!use_neon){ 
         volk_32fc_8i_fft_32fc_generic(cVector, aVector, isinverse, num_points);
     }else{
         ne10_fft_c2c_1d_float32_neon( (ne10_fft_cpx_float32_t*) out_neon, (ne10_fft_cpx_float32_t*) in_neon, cfg, (ne10_int32_t) isinverse);
