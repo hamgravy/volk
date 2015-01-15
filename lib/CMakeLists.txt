@@ -476,7 +476,7 @@ list(APPEND volk_sources kiss_fft_int16.c)
 ########################################################################
 # Handle Ne10 support
 ########################################################################
-
+if(NOT CPU_IS_x86)
 #list(APPEND volk_sources NE10_init_dsp.c)
 
 list(APPEND volk_sources NE10_fft.c)
@@ -501,6 +501,7 @@ list(APPEND volk_sources NE10_fir.neon.s)
 
 list(APPEND volk_sources NE10_mask_table.c)
 list(APPEND volk_sources NE10_fft_generic_float32.neonintrinsic.cpp)
+endif()
 
 ########################################################################
 # Handle the generated constants
