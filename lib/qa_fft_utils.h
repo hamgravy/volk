@@ -10,6 +10,8 @@
 #include <volk/volk.h>
 #include <volk/volk_common.h>
 
+
+
 struct volk_type_t {
     bool is_float;
     bool is_scalar;
@@ -68,6 +70,8 @@ bool run_volk_tests(
 #define VOLK_PROFILE(func, tol, scalar, len, iter, results, bnmode, kernel_regex) run_volk_tests(func##_get_func_desc(), (void (*)())func##_manual, std::string(#func), tol, scalar, len, iter, results, "NULL", bnmode, kernel_regex)
 
 #define VOLK_PUPPET_PROFILE(func, puppet_master_func, tol, scalar, len, iter, results, bnmode, kernel_regex) run_volk_tests(func##_get_func_desc(), (void (*)())func##_manual, std::string(#func), tol, scalar, len, iter, results, std::string(#puppet_master_func), bnmode, kernel_regex)
+
+#define VOLK_FFT_PROFILE(func, tol, scalar, len, iter, results, bnmode, kernel_regex) run_volk_tests(func##_get_func_desc(), (void (*)())func##_manual, std::string(#func), tol, scalar, len, iter, results, "NULL", bnmode, kernel_regex)
 
 typedef void (*volk_fn_1arg)(void *, unsigned int, const char*); //one input, operate in place
 typedef void (*volk_fn_2arg)(void *, void *, unsigned int, const char*);

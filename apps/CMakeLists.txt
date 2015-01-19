@@ -48,6 +48,24 @@ install(
     COMPONENT "volk"
 )
 
+# MAKE volk_fft_profile
+add_executable(volk_fft_profile
+    ${CMAKE_CURRENT_SOURCE_DIR}/volk_fft_profile.cc
+    ${CMAKE_SOURCE_DIR}/lib/qa_fft_utils.cc
+    ${CMAKE_SOURCE_DIR}/lib/volk_fft_config.cc
+    ${CMAKE_SOURCE_DIR}/lib/kiss_fft_float.c
+)
+
+target_link_libraries(volk_fft_profile volk ${Boost_LIBRARIES}) 
+target_link_libraries(volk_fft_profile ${volk_libraries})  
+
+install(
+    TARGETS volk_fft_profile
+    DESTINATION bin
+    COMPONENT "volk"
+)
+
+
 # MAKE volk-config-info
 add_executable(volk-config-info volk-config-info.cc)
 target_link_libraries(volk-config-info volk ${Boost_LIBRARIES})

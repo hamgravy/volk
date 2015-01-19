@@ -466,41 +466,39 @@ else()
 endif()
 
 ########################################################################
-# Handle kissfft support
+# Handle volkfft support
 ########################################################################
-
 list(APPEND volk_sources kiss_fft_float.c)
 list(APPEND volk_sources kiss_fft_int32.c)
 list(APPEND volk_sources kiss_fft_int16.c)
+list(APPEND volk_sources volk_fft_config.cc)
 
 ########################################################################
 # Handle Ne10 support
 ########################################################################
 if(NOT CPU_IS_x86)
-#list(APPEND volk_sources NE10_init_dsp.c)
+    list(APPEND volk_sources NE10_fft.c)
 
-list(APPEND volk_sources NE10_fft.c)
+    list(APPEND volk_sources NE10_fft_float32.c)
+    list(APPEND volk_sources NE10_fft_float32.neon.c)
+    list(APPEND volk_sources NE10_fft_float32.neon.s)
+    list(APPEND volk_sources NE10_fft_generic_float32.c)
 
-list(APPEND volk_sources NE10_fft_float32.c)
-list(APPEND volk_sources NE10_fft_float32.neon.c)
-list(APPEND volk_sources NE10_fft_float32.neon.s)
-list(APPEND volk_sources NE10_fft_generic_float32.c)
+    list(APPEND volk_sources NE10_fft_int32.c)
+    list(APPEND volk_sources NE10_fft_int32.neon.c)
+    list(APPEND volk_sources NE10_fft_int32.neon.s)
 
-list(APPEND volk_sources NE10_fft_int32.c)
-list(APPEND volk_sources NE10_fft_int32.neon.c)
-list(APPEND volk_sources NE10_fft_int32.neon.s)
+    list(APPEND volk_sources NE10_fft_int16.c)
+    list(APPEND volk_sources NE10_fft_int16.neon.c)
+    list(APPEND volk_sources NE10_fft_int16.neon.s)
 
-list(APPEND volk_sources NE10_fft_int16.c)
-list(APPEND volk_sources NE10_fft_int16.neon.c)
-list(APPEND volk_sources NE10_fft_int16.neon.s)
+    list(APPEND volk_sources NE10_iir.c)
+    list(APPEND volk_sources NE10_iir.neon.s)
+    list(APPEND volk_sources NE10_fir.c)
+    list(APPEND volk_sources NE10_fir.neon.s)
 
-list(APPEND volk_sources NE10_iir.c)
-list(APPEND volk_sources NE10_iir.neon.s)
-list(APPEND volk_sources NE10_fir.c)
-list(APPEND volk_sources NE10_fir.neon.s)
-
-list(APPEND volk_sources NE10_mask_table.c)
-list(APPEND volk_sources NE10_fft_generic_float32.neonintrinsic.cpp)
+    list(APPEND volk_sources NE10_mask_table.c)
+    list(APPEND volk_sources NE10_fft_generic_float32.neonintrinsic.cpp)
 endif()
 
 ########################################################################

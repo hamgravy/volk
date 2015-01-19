@@ -17,11 +17,13 @@ typedef struct volk_arch_pref
 // get path to volk_config profiling info
 ////////////////////////////////////////////////////////////////////////
 VOLK_API void volk_get_config_path(char *);
+VOLK_API void volk_get_fft_config_path(char *);
 
 ////////////////////////////////////////////////////////////////////////
 // load prefs into global prefs struct
 ////////////////////////////////////////////////////////////////////////
 VOLK_API size_t volk_load_preferences(volk_arch_pref_t **);
+VOLK_API size_t volk_load_fft_preferences(volk_arch_pref_t **);
 
 __VOLK_DECL_END
 

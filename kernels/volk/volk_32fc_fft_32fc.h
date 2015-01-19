@@ -20,8 +20,8 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#ifndef INCLUDED_volk_32fc_fftpuppet_32fc_a_H
-#define INCLUDED_volk_32fc_fftpuppet_32fc_a_H
+#ifndef INCLUDED_volk_32fc_fft_32fc_a_H
+#define INCLUDED_volk_32fc_fft_32fc_a_H
 
 #include <volk/volk_complex.h>
 #include <stdio.h>
@@ -30,7 +30,7 @@
 
 #ifdef LV_HAVE_GENERIC
 
-static inline void volk_32fc_fftpuppet_32fc_generic(lv_32fc_t* outVector, const lv_32fc_t* inVector, unsigned int num_points){
+static inline void volk_32fc_fft_32fc_generic(lv_32fc_t* outVector, const lv_32fc_t* inVector, unsigned int num_points){
 
     volk_32fc_8i_fft_32fc_generic(outVector, inVector, 0, num_points);
     
@@ -40,7 +40,7 @@ static inline void volk_32fc_fftpuppet_32fc_generic(lv_32fc_t* outVector, const 
 
 #ifdef LV_HAVE_NEON
 
-static inline void volk_32fc_fftpuppet_32fc_neon(lv_32fc_t* outVector, const lv_32fc_t* inVector, unsigned int num_points){
+static inline void volk_32fc_fft_32fc_neon(lv_32fc_t* outVector, const lv_32fc_t* inVector, unsigned int num_points){
 
     volk_32fc_8i_fft_32fc_neon(outVector, inVector, 0, num_points);
     
@@ -49,4 +49,4 @@ static inline void volk_32fc_fftpuppet_32fc_neon(lv_32fc_t* outVector, const lv_
 #endif /* LV_HAVE_NEON */
 
 
-#endif /* INCLUDED_volk_32fc_fftpuppet_32fc_a_H */
+#endif /* INCLUDED_volk_32fc_fft_32fc_a_H */
