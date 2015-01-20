@@ -9,6 +9,7 @@
 #include <map>
 #include <volk/volk.h>
 #include <volk/volk_common.h>
+#include <volk/volk_fft_config.h>
 
 
 
@@ -44,7 +45,7 @@ class volk_test_results_t {
         std::string best_arch_u;
 };
 
-bool run_volk_tests(
+bool run_volk_fft_tests(
     volk_func_desc_t, 
     void(*)(), 
     std::string, 
@@ -61,17 +62,17 @@ bool run_volk_tests(
 
 #define VOLK_RUN_TESTS(func, tol, scalar, len, iter) \
     BOOST_AUTO_TEST_CASE(func##_test) { \
-        BOOST_CHECK_EQUAL(run_volk_tests( \
+        BOOST_CHECK_EQUAL(run_volk_fft_tests( \
             func##_get_func_desc(), (void (*)())func##_manual, \
             std::string(#func), tol, scalar, len, iter, 0, "NULL"), \
           0); \
     }
     
-#define VOLK_PROFILE(func, tol, scalar, len, iter, results, bnmode, kernel_regex) run_volk_tests(func##_get_func_desc(), (void (*)())func##_manual, std::string(#func), tol, scalar, len, iter, results, "NULL", bnmode, kernel_regex)
+#define VOLK_PROFILE(func, tol, scalar, len, iter, results, bnmode, kernel_regex) run_volk_fft_tests(func##_get_func_desc(), (void (*)())func##_manual, std::string(#func), tol, scalar, len, iter, results, "NULL", bnmode, kernel_regex)
 
-#define VOLK_PUPPET_PROFILE(func, puppet_master_func, tol, scalar, len, iter, results, bnmode, kernel_regex) run_volk_tests(func##_get_func_desc(), (void (*)())func##_manual, std::string(#func), tol, scalar, len, iter, results, std::string(#puppet_master_func), bnmode, kernel_regex)
+#define VOLK_PUPPET_PROFILE(func, puppet_master_func, tol, scalar, len, iter, results, bnmode, kernel_regex) run_volk_fft_tests(func##_get_func_desc(), (void (*)())func##_manual, std::string(#func), tol, scalar, len, iter, results, std::string(#puppet_master_func), bnmode, kernel_regex)
 
-#define VOLK_FFT_PROFILE(func, tol, scalar, len, iter, results, bnmode, kernel_regex) run_volk_tests(func##_get_func_desc(), (void (*)())func##_manual, std::string(#func), tol, scalar, len, iter, results, "NULL", bnmode, kernel_regex)
+#define VOLK_FFT_PROFILE(func, tol, scalar, len, iter, results, bnmode, kernel_regex) run_volk_fft_tests(func##_get_func_desc(), (void (*)())func##_manual, std::string(#func), tol, scalar, len, iter, results, "NULL", bnmode, kernel_regex)
 
 typedef void (*volk_fn_1arg)(void *, unsigned int, const char*); //one input, operate in place
 typedef void (*volk_fn_2arg)(void *, void *, unsigned int, const char*);
@@ -82,6 +83,7 @@ typedef void (*volk_fn_2arg_s32f)(void *, void *, float, unsigned int, const cha
 typedef void (*volk_fn_3arg_s32f)(void *, void *, void *, float, unsigned int, const char*);
 typedef void (*volk_fn_1arg_s32fc)(void *, lv_32fc_t, unsigned int, const char*); //one input vector, one scalar float input
 typedef void (*volk_fn_2arg_s32fc)(void *, void *, lv_32fc_t, unsigned int, const char*);
+//typedef void (*volk_fn_2arg_fft_s32fc)(void *, void *, lv_32fc_t, unsigned int, const char*, fftarch* archcfg); // ESB
 typedef void (*volk_fn_3arg_s32fc)(void *, void *, void *, lv_32fc_t, unsigned int, const char*);
 
 #endif //VOLK_QA_UTILS_H

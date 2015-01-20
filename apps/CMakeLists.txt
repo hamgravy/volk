@@ -57,7 +57,7 @@ add_executable(volk_fft_profile
 )
 
 target_link_libraries(volk_fft_profile volk ${Boost_LIBRARIES}) 
-target_link_libraries(volk_fft_profile ${volk_libraries})  
+# target_link_libraries(volk_fft_profile ${volk_libraries})  
 
 install(
     TARGETS volk_fft_profile

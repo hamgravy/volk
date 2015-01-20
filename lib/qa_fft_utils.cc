@@ -21,7 +21,6 @@
 #include <boost/type_traits.hpp>
 #include <stdio.h>
 
-#include <volk/volk_fft_config.h>
 
 float uniform() {
   return 2.0 * ((float) rand() / RAND_MAX - 0.5);	// uniformly (-1, 1)
@@ -220,7 +219,7 @@ inline void run_cast_test3_s32fc(volk_fn_3arg_s32fc func, std::vector<void *> &b
 }
 
 // This function is a nop that helps resolve GNU Radio bugs 582 and 583.
-// Without this the cast in run_volk_tests for tol_i = static_cast<int>(float tol)
+// Without this the cast in run_volk_fft_tests for tol_i = static_cast<int>(float tol)
 // won't happen on armhf (reported on cortex A9 and A15).
 void lv_force_cast_hf( int tol_i, float tol_f)
 {
@@ -325,7 +324,7 @@ public:
 private: std::vector<void * > _mems;
 };
 
-bool run_volk_tests(volk_func_desc_t desc,
+bool run_volk_fft_tests(volk_func_desc_t desc,
                     void (*manual_func)(),
                     std::string name,
                     float tol,
@@ -348,7 +347,7 @@ bool run_volk_tests(volk_func_desc_t desc,
         results->back().vlen = vlen;
         results->back().iter = iter;
     }
-    std::cout << "RUN_VOLK_TESTS: " << name << "(" << vlen << "," << iter << ")" << std::endl;
+    std::cout << "RUN_VOLK_FFT_TESTS: " << name << "(" << vlen << "," << iter << ")" << std::endl;
 
     // The multiply and lv_force_cast_hf are work arounds for GNU Radio bugs 582 and 583
     // The bug is the casting/assignment below do not happen, which results in false
@@ -415,9 +414,15 @@ bool run_volk_tests(volk_func_desc_t desc,
     //now run the test
     clock_t start, end;
     std::vector<double> profile_times;
-    for(size_t i = 0; i < arch_list.size(); i++) {
-        helloworld(8);
     
+    fftarch* cfg;
+    cfg = new fftarch[arch_list.size()];
+    for(size_t i = 0; i < arch_list.size(); i++) {
+        cfg[i] = fftalloc(arch_list[i], vlen);
+        std::cout << cfg[i].size << std::endl;
+    }
+    
+    for(size_t i = 0; i < arch_list.size(); i++) {
         start = clock();
 
         switch(both_sigs.size()) {
@@ -447,9 +452,10 @@ bool run_volk_tests(volk_func_desc_t desc,
             result.units = "ms";
             results->back().results[result.name] = result;
         }
-
+        
         profile_times.push_back(arch_time);
     }
+    delete [] cfg;
 
     //and now compare each output to the generic output
     //first we have to know which output is the generic one, they aren't in order...

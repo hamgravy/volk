@@ -471,7 +471,10 @@ endif()
 list(APPEND volk_sources kiss_fft_float.c)
 list(APPEND volk_sources kiss_fft_int32.c)
 list(APPEND volk_sources kiss_fft_int16.c)
-list(APPEND volk_sources volk_fft_config.cc)
+
+
+#list(APPEND volk_fft_sources volk_fft_config.cc)
+list(APPEND volk_fft_sources kiss_fft_float.c)
 
 ########################################################################
 # Handle Ne10 support
@@ -552,8 +555,11 @@ if(MSVC)
 endif()
 
 #create the volk runtime library
-add_library(volk SHARED ${volk_sources})
+#add_library(volk SHARED ${volk_sources} ${volk_fft_sources}) # ESB
+add_library(volk SHARED ${volk_sources}) # ESB
+
 target_link_libraries(volk ${volk_libraries})
+
 set_target_properties(volk PROPERTIES SOVERSION ${LIBVER})
 set_target_properties(volk PROPERTIES DEFINE_SYMBOL "volk_EXPORTS")
 
