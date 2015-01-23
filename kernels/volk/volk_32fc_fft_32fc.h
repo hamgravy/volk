@@ -25,28 +25,42 @@
 
 #include <volk/volk_complex.h>
 #include <stdio.h>
-#include <volk/volk_32fc_8i_fft_32fc.h>
+#include <volk/volk_fft_config.h>
 
 
 #ifdef LV_HAVE_GENERIC
 
-static inline void volk_32fc_fft_32fc_generic(lv_32fc_t* outVector, const lv_32fc_t* inVector, unsigned int num_points){
-
-    volk_32fc_8i_fft_32fc_generic(outVector, inVector, 0, num_points);
-    
+static inline void volk_32fc_fft_32fc_generic(lv_32fc_t* outVector, const lv_32fc_t* inVector, const fftarch* cfg, unsigned int num_points){  
+    kiss_fft_cpx_float *kout	= (kiss_fft_cpx_float*) outVector;
+    kiss_fft_cpx_float *tbuf    = (kiss_fft_cpx_float*) inVector;
+    kiss_fft_float(cfg->generic_arch_cfg_float, tbuf, kout); 
+    /*
+    int ii;
+    printf("x=[");
+	for (ii=0; ii < num_points; ii++){
+		printf("%f+%fi;",(float)tbuf[ii].r,(float)tbuf[ii].i);
+	}
+	printf("];\n");
+	
+	printf("y=[");
+	for (ii=0; ii < num_points; ii++){
+		printf("%f+%fi;",(float)kout[ii].r,(float)kout[ii].i);
+	}
+	printf("];\n");
+	*/      
 }
 
 #endif /* LV_HAVE_GENERIC */
 
 #ifdef LV_HAVE_NEON
+#include <arm_neon.h>
+#include <Ne10/NE10.h>
+#include <Ne10/NE10_dsp.h>
 
-static inline void volk_32fc_fft_32fc_neon(lv_32fc_t* outVector, const lv_32fc_t* inVector, unsigned int num_points){
-
-    volk_32fc_8i_fft_32fc_neon(outVector, inVector, 0, num_points);
-    
+static inline void volk_32fc_fft_32fc_neon(lv_32fc_t* outVector, const lv_32fc_t* inVector, const fftarch* cfg, unsigned int num_points){
+    printf("rats!!!!\n");    
 }
 
 #endif /* LV_HAVE_NEON */
-
 
 #endif /* INCLUDED_volk_32fc_fft_32fc_a_H */

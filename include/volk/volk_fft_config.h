@@ -2,19 +2,37 @@
 #define VOLK_FFT_CONFIG_H
 
 #include <kissfft/kissfft_float/kiss_fft_float.h>
-#include <iostream>
-#include <string>
+#include <kissfft/kissfft_int32/kiss_fft_int32.h>
+#include <kissfft/kissfft_int16/kiss_fft_int16.h>
+#include <stdio.h>
+#include <stdbool.h>
+
+#if defined(__arm__)
+#include <Ne10/NE10_types.h>
+#endif
+
 
 typedef struct{
     int size;
-    int isinverse;
-    int arch;
-    kiss_fft_cfg_float generic_arch_cfg;
+    bool isinverse;
+    char* arch;
+    kiss_fft_cfg_float generic_arch_cfg_float;
+    kiss_fft_cfg_int32 generic_arch_cfg_int32;
+    kiss_fft_cfg_int16 generic_arch_cfg_int16;
+
+#if defined(__arm__)
+    ne10_fft_cfg_float32_t neon_arch_cfg;
+#endif    
 } fftarch;
 
+// had to rip this out of qa_fft_utils to get past the requirement for C++
+// this will also allow more customization for later FFT features...multi-dimension FFTs, perhaps real FFTs and other types of transforms even. 
+typedef struct {
+    bool is_float;
+    int size;
+} volk_fft_inputsig;
 
-void helloworld(int i);
-fftarch fftalloc(std::string arch, int vlen);
+void fftalloc(fftarch* fft_conf, const char* arch, const volk_fft_inputsig* inputsig, const int vlen, const bool isinverse);
 
 
 

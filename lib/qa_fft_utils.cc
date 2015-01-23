@@ -147,6 +147,7 @@ static void get_signatures_from_name(std::vector<volk_type_t> &inputsig,
     std::string fn_name;
     volk_type_t type;
     BOOST_FOREACH(std::string token, toked) {
+        //std::cout << token << std::endl; // ESB
         try {
             type = volk_type_from_string(token);
             if(side == SIDE_NAME) side = SIDE_OUTPUT; //if this is the first one after the name...
@@ -185,6 +186,10 @@ inline void run_cast_test1(volk_fn_1arg func, std::vector<void *> &buffs, unsign
 inline void run_cast_test2(volk_fn_2arg func, std::vector<void *> &buffs, unsigned int vlen, unsigned int iter, std::string arch) {
     while(iter--) func(buffs[0], buffs[1], vlen, arch.c_str());
 }
+
+inline void run_cast_test2_fft(volk_fn_2arg_fft func, std::vector<void *> &buffs, fftarch* cfg, unsigned int vlen, unsigned int iter, std::string arch) {
+    while(iter--) func(buffs[0], buffs[1], cfg, vlen, arch.c_str());
+} // ESB
 
 inline void run_cast_test3(volk_fn_3arg func, std::vector<void *> &buffs, unsigned int vlen, unsigned int iter, std::string arch) {
     while(iter--) func(buffs[0], buffs[1], buffs[2], vlen, arch.c_str());
@@ -330,9 +335,10 @@ bool run_volk_fft_tests(volk_func_desc_t desc,
                     float tol,
                     lv_32fc_t scalar,
                     int vlen,
+                    bool isinverse,
                     int iter,
                     std::vector<volk_test_results_t> *results,
-                    std::string puppet_master_name,
+                    std::string puppet_master_name, // remove this # ESB
                     bool benchmark_mode, 
                     std::string kernel_regex
                    ) {
@@ -347,7 +353,10 @@ bool run_volk_fft_tests(volk_func_desc_t desc,
         results->back().vlen = vlen;
         results->back().iter = iter;
     }
-    std::cout << "RUN_VOLK_FFT_TESTS: " << name << "(" << vlen << "," << iter << ")" << std::endl;
+    
+    const std::string transformdir = isinverse ? "inverse" : "forward";
+    
+    std::cout << "RUN_VOLK_FFT_TESTS: " << name << " " << transformdir << " (" << vlen << "," << iter << ")" << std::endl;
 
     // The multiply and lv_force_cast_hf are work arounds for GNU Radio bugs 582 and 583
     // The bug is the casting/assignment below do not happen, which results in false
@@ -361,6 +370,10 @@ bool run_volk_fft_tests(volk_func_desc_t desc,
 
     //first let's get a list of available architectures for the test
     std::vector<std::string> arch_list = get_arch_list(desc);
+    
+    //for (int i=0; i< arch_list.size(); i++){
+    //    std::cout << "arches: " << arch_list[i] << std::endl; // ESB
+    //}
 
     if((!benchmark_mode) && (arch_list.size() < 2)) {
         std::cout << "no architectures to test" << std::endl;
@@ -373,7 +386,8 @@ bool run_volk_fft_tests(volk_func_desc_t desc,
     //now we have to get a function signature by parsing the name
     std::vector<volk_type_t> inputsig, outputsig;
     get_signatures_from_name(inputsig, outputsig, name);
-
+    
+      
     //pull the input scalars into their own vector
     std::vector<volk_type_t> inputsc;
     for(size_t i=0; i<inputsig.size(); i++) {
@@ -383,8 +397,8 @@ bool run_volk_fft_tests(volk_func_desc_t desc,
             i -= 1;
         }
     }
-    //for(int i=0; i<inputsig.size(); i++) std::cout << "Input: " << inputsig[i].str << std::endl;
-    //for(int i=0; i<outputsig.size(); i++) std::cout << "Output: " << outputsig[i].str << std::endl;
+    //for(int i=0; i<inputsig.size(); i++) std::cout << "Input: " << inputsig[i].str << std::endl; // ESB
+    //for(int i=0; i<outputsig.size(); i++) std::cout << "Output: " << outputsig[i].str << std::endl; // ESB
     std::vector<void *> inbuffs;
     BOOST_FOREACH(volk_type_t sig, inputsig) {
         if(!sig.is_scalar) //we don't make buffers for scalars
@@ -395,13 +409,15 @@ bool run_volk_fft_tests(volk_func_desc_t desc,
     }
 
     //ok let's make a vector of vector of void buffers, which holds the input/output vectors for each arch
-    std::vector<std::vector<void *> > test_data;
+    //since this is run_volk_fft_tests and it's a special function for ffts ... do some extra fft stuff
+    std::vector<std::vector<void *> > test_data;    
     for(size_t i=0; i<arch_list.size(); i++) {
         std::vector<void *> arch_buffs;
-        for(size_t j=0; j<outputsig.size(); j++) {
+        
+        for(size_t j=0; j<outputsig.size(); j++) { // for fft functions, fft output size will always be 1 
             arch_buffs.push_back(mem_pool.get_new(vlen*outputsig[j].size*(outputsig[j].is_complex ? 2 : 1)));
         }
-        for(size_t j=0; j<inputsig.size(); j++) {
+        for(size_t j=0; j<inputsig.size(); j++) { // for fft functions, fft input size will always be 1
             arch_buffs.push_back(inbuffs[j]);
         }
         test_data.push_back(arch_buffs);
@@ -411,32 +427,34 @@ bool run_volk_fft_tests(volk_func_desc_t desc,
     both_sigs.insert(both_sigs.end(), outputsig.begin(), outputsig.end());
     both_sigs.insert(both_sigs.end(), inputsig.begin(), inputsig.end());
 
+    if (inputsig.size() != 1){
+        throw "inputsig was evaluated to be not equal to 1, a size assumed for fft operations";
+    }
+
+    std::vector<double> profile_times;
+    fftarch fftcfg[arch_list.size()];
+    
+    volk_fft_inputsig fftinputsig;
+    fftinputsig.is_float = inputsig[0].is_float;
+    fftinputsig.size = inputsig[0].size;
+    
+    for(size_t i = 0; i < arch_list.size(); i++) {        
+        fftalloc(&fftcfg[i], arch_list[i].c_str(), &fftinputsig ,vlen, isinverse);
+    }    
+    
     //now run the test
     clock_t start, end;
-    std::vector<double> profile_times;
-    
-    fftarch* cfg;
-    cfg = new fftarch[arch_list.size()];
-    for(size_t i = 0; i < arch_list.size(); i++) {
-        cfg[i] = fftalloc(arch_list[i], vlen);
-        std::cout << cfg[i].size << std::endl;
-    }
-    
     for(size_t i = 0; i < arch_list.size(); i++) {
         start = clock();
 
         switch(both_sigs.size()) {
             case 2:
                 if(inputsc.size() == 0) {
-                    run_cast_test2((volk_fn_2arg)(manual_func), test_data[i], vlen, iter, arch_list[i]);
-                } else if(inputsc.size() == 1 && inputsc[0].is_float) {
-                    if(inputsc[0].is_complex) {
-                        run_cast_test2_s32fc((volk_fn_2arg_s32fc)(manual_func), test_data[i], scalar, vlen, iter, arch_list[i]);
-                    } else { // someday there may be a use for real-valued FFTs here
-                        run_cast_test2_s32f((volk_fn_2arg_s32f)(manual_func), test_data[i], scalar.real(), vlen, iter, arch_list[i]);
-                    }
-                } else throw "unsupported 2 arg function >1 scalars";
-                break;   
+                    run_cast_test2_fft((volk_fn_2arg_fft)(manual_func), test_data[i], &fftcfg[i], fftcfg[i].size, iter, fftcfg[i].arch);
+                }else{
+                    throw "rekt";
+                }    
+                break;                   
             default:
                 throw "no function handler for this signature";
                 break;
@@ -455,7 +473,6 @@ bool run_volk_fft_tests(volk_func_desc_t desc,
         
         profile_times.push_back(arch_time);
     }
-    delete [] cfg;
 
     //and now compare each output to the generic output
     //first we have to know which output is the generic one, they aren't in order...
@@ -554,7 +571,7 @@ bool run_volk_fft_tests(volk_func_desc_t desc,
     std::cout << "Best aligned arch: " << best_arch_a << std::endl;
     std::cout << "Best unaligned arch: " << best_arch_u << std::endl;
     if(results) {
-        /*        
+        /* Remove this # ESB       
         if(puppet_master_name == "NULL") {
             results->back().config_name = name;
         } else {
@@ -562,7 +579,7 @@ bool run_volk_fft_tests(volk_func_desc_t desc,
         }
         */
         results->back().config_name = "";
-        
+        results->back().isinverse = isinverse;
         results->back().best_arch_a = best_arch_a;
         results->back().best_arch_u = best_arch_u;
     }

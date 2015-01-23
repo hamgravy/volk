@@ -24,6 +24,7 @@
 
 #include <inttypes.h>
 #include <volk/volk_complex.h>
+#include <volk/volk_fft_config.h>
 
 #for $kern in $kernels
 typedef void (*$(kern.pname))($kern.arglist_types);

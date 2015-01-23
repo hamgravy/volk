@@ -25,55 +25,41 @@
 
 #include <volk/volk_complex.h>
 #include <stdio.h>
-#include <volk/volk_16ic_8i_fft_16ic.h>
+#include <volk/volk_fft_config.h>
 
 
 #ifdef LV_HAVE_GENERIC
 
-static inline void volk_16ic_fft_16ic_generic(lv_16sc_t* outVector, const lv_16sc_t* inVector, unsigned int num_points){
-    int16_t* in_generic = (int16_t*) inVector;
-    static int16_t* in_scaled = NULL;
-    static unsigned int num_points_old = 0;
-    int ii;        
- 
-    if (num_points != num_points_old){
-        num_points_old = num_points;        
-        if(in_scaled != NULL){
-            free(in_scaled);    
-        }
-        in_scaled = (int16_t*) malloc (num_points * 2 *  sizeof (int16_t));       
-        for(ii = 0; ii < num_points*2; ii++){
-            in_scaled[ii] = in_generic[ii] >> 1;
-        }
-    }
 
-    volk_16ic_8i_fft_16ic_generic(outVector, (lv_16sc_t*)in_scaled, 0, num_points);
+static inline void volk_16ic_fft_16ic_generic(lv_16sc_t* outVector, const lv_16sc_t* inVector, const fftarch* cfg, unsigned int num_points){
+    kiss_fft_cpx_int16 *kout	= (kiss_fft_cpx_int16*) outVector;
+    kiss_fft_cpx_int16 *tbuf    = (kiss_fft_cpx_int16*) inVector;
+    kiss_fft_int16(cfg->generic_arch_cfg_int16, tbuf, kout);
+    /*
+    int ii;
+    printf("x=[");
+	for (ii=0; ii < num_points; ii++){
+		printf("%d+%di;",(int16_t)tbuf[ii].r,(int16_t)tbuf[ii].i);
+	}
+	printf("];\n");
+	
+	printf("y=[");
+	for (ii=0; ii < num_points; ii++){
+		printf("%d+%di;",(int16_t)kout[ii].r,(int16_t)kout[ii].i);
+	}
+	printf("];\n");
+	*/
 }
 
 #endif /* LV_HAVE_GENERIC */
 
 #ifdef LV_HAVE_NEON
+#include <arm_neon.h>
+#include <Ne10/NE10.h>
+#include <Ne10/NE10_dsp.h>
 
 static inline void volk_16ic_fft_16ic_neon(lv_16sc_t* outVector, const lv_16sc_t* inVector, unsigned int num_points){
-    ne10_int16_t* in_neon = (ne10_int16_t*) inVector;
-    static ne10_int16_t* in_scaled = NULL;
-    static unsigned int num_points_old = 0;
-    int ii;
-
-    if (num_points != num_points_old){
-        num_points_old = num_points;  
-      
-        if(in_scaled != NULL){
-            free(in_scaled);    
-        }
-        in_scaled = (ne10_int16_t*) malloc (num_points * 2 *  sizeof (ne10_int16_t));       
-        for(ii = 0; ii < num_points*2; ii++){
-            in_scaled[ii] = in_neon[ii] >> 1;
-        }
-    }
-
-    volk_16ic_8i_fft_16ic_neon(outVector, (lv_16sc_t*)in_scaled, 0, num_points);   
-
+    printf("rats!!!!\n");
 }
 
 #endif /* LV_HAVE_NEON */

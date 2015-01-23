@@ -24,7 +24,7 @@
 #define INCLUDED_volk_32fc_8i_fft_32fc_u_H
 
 #include <inttypes.h>
-#include <stdio.h>
+//#include <stdio.h>
 
 #ifdef LV_HAVE_GENERIC
 #include <kissfft/kissfft_float/kiss_fft_float.h>

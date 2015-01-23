@@ -54,6 +54,8 @@ add_executable(volk_fft_profile
     ${CMAKE_SOURCE_DIR}/lib/qa_fft_utils.cc
     ${CMAKE_SOURCE_DIR}/lib/volk_fft_config.cc
     ${CMAKE_SOURCE_DIR}/lib/kiss_fft_float.c
+    ${CMAKE_SOURCE_DIR}/lib/kiss_fft_int32.c
+    ${CMAKE_SOURCE_DIR}/lib/kiss_fft_int16.c
 )
 
 target_link_libraries(volk_fft_profile volk ${Boost_LIBRARIES}) 
