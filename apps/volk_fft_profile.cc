@@ -179,7 +179,7 @@ int main(int argc, char *argv[]) {
     // Run tests
     std::vector<volk_test_results_t> results;
     
-    const int sizes[16]={4,16,32,64,128,192,256,512,768,1024,1152,2048,4096,8192,16384,32768};
+    const int sizes[13]={4,16,32,64,128,256,512,1024,2048,4096,8192,16384,32768};
     const unsigned int points = 33554432*4;
     int iterations;
     /*

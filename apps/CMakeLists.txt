@@ -48,18 +48,22 @@ install(
     COMPONENT "volk"
 )
 
-# MAKE volk_fft_profile
-add_executable(volk_fft_profile
-    ${CMAKE_CURRENT_SOURCE_DIR}/volk_fft_profile.cc
-    ${CMAKE_SOURCE_DIR}/lib/qa_fft_utils.cc
-    ${CMAKE_SOURCE_DIR}/lib/volk_fft_config.cc
-    ${CMAKE_SOURCE_DIR}/lib/kiss_fft_float.c
-    ${CMAKE_SOURCE_DIR}/lib/kiss_fft_int32.c
-    ${CMAKE_SOURCE_DIR}/lib/kiss_fft_int16.c
-)
+list(APPEND volk_fft_profile_sources ${CMAKE_CURRENT_SOURCE_DIR}/volk_fft_profile.cc)
+list(APPEND volk_fft_profile_sources ${CMAKE_SOURCE_DIR}/lib/qa_fft_utils.cc)
+list(APPEND volk_fft_profile_sources ${CMAKE_SOURCE_DIR}/lib/volk_fft_config.cc)
+list(APPEND volk_fft_profile_sources ${CMAKE_SOURCE_DIR}/lib/kiss_fft_float.c)
+list(APPEND volk_fft_profile_sources ${CMAKE_SOURCE_DIR}/lib/kiss_fft_int32.c)
+list(APPEND volk_fft_profile_sources ${CMAKE_SOURCE_DIR}/lib/kiss_fft_int16.c)
 
-target_link_libraries(volk_fft_profile volk ${Boost_LIBRARIES}) 
-# target_link_libraries(volk_fft_profile ${volk_libraries})  
+if(NOT CPU_IS_x86)
+    list(APPEND volk_fft_profile_sources ${CMAKE_SOURCE_DIR}/lib/NE10_fft.c)
+    list(APPEND volk_fft_profile_sources ${CMAKE_SOURCE_DIR}/lib/NE10_fft_int32.c)
+    list(APPEND volk_fft_profile_sources ${CMAKE_SOURCE_DIR}/lib/NE10_fft_int16.c)
+endif()
+
+add_executable(volk_fft_profile ${volk_fft_profile_sources})
+
+target_link_libraries(volk_fft_profile volk ${Boost_LIBRARIES})  
 
 install(
     TARGETS volk_fft_profile

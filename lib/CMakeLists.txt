@@ -495,12 +495,12 @@ if(NOT CPU_IS_x86)
     list(APPEND volk_sources NE10_fft_int16.neon.c)
     list(APPEND volk_sources NE10_fft_int16.neon.s)
 
-    list(APPEND volk_sources NE10_iir.c)
-    list(APPEND volk_sources NE10_iir.neon.s)
-    list(APPEND volk_sources NE10_fir.c)
-    list(APPEND volk_sources NE10_fir.neon.s)
+    #list(APPEND volk_sources NE10_iir.c)
+    #list(APPEND volk_sources NE10_iir.neon.s)
+    #list(APPEND volk_sources NE10_fir.c)
+    #list(APPEND volk_sources NE10_fir.neon.s)
 
-    list(APPEND volk_sources NE10_mask_table.c)
+    #list(APPEND volk_sources NE10_mask_table.c)
     list(APPEND volk_sources NE10_fft_generic_float32.neonintrinsic.cpp)
 endif()
 

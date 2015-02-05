@@ -26,6 +26,7 @@
 #include <volk/volk_complex.h>
 #include <stdio.h>
 #include <volk/volk_fft_config.h>
+#include <stdbool.h>
 
 
 #ifdef LV_HAVE_GENERIC
@@ -37,28 +38,49 @@ static inline void volk_32fc_fft_32fc_generic(lv_32fc_t* outVector, const lv_32f
     /*
     int ii;
     printf("x=[");
-	for (ii=0; ii < num_points; ii++){
-		printf("%f+%fi;",(float)tbuf[ii].r,(float)tbuf[ii].i);
-	}
-	printf("];\n");
-	
-	printf("y=[");
-	for (ii=0; ii < num_points; ii++){
-		printf("%f+%fi;",(float)kout[ii].r,(float)kout[ii].i);
-	}
-	printf("];\n");
-	*/      
+    for (ii=0; ii < num_points; ii++){
+        printf("%f+%fi;",(float)tbuf[ii].r,(float)tbuf[ii].i);
+    }
+    printf("];\n");
+
+    printf("y=[");
+    for (ii=0; ii < num_points; ii++){
+        printf("%f+%fi;",(float)kout[ii].r,(float)kout[ii].i);
+    }
+    printf("];\n");
+    */      
 }
 
 #endif /* LV_HAVE_GENERIC */
 
 #ifdef LV_HAVE_NEON
-#include <arm_neon.h>
+
 #include <Ne10/NE10.h>
-#include <Ne10/NE10_dsp.h>
 
 static inline void volk_32fc_fft_32fc_neon(lv_32fc_t* outVector, const lv_32fc_t* inVector, const fftarch* cfg, unsigned int num_points){
-    printf("rats!!!!\n");    
+    ne10_float32_t* in_neon = (ne10_float32_t*) inVector;
+    ne10_float32_t* out_neon = (ne10_float32_t*) outVector;  
+    const bool use_neon = (num_points % 4 == 0); // not actually faster
+
+    ne10_fft_c2c_1d_float32_neon( (ne10_fft_cpx_float32_t*) out_neon, \
+                                  (ne10_fft_cpx_float32_t*) in_neon, \
+                                  cfg->neon_arch_cfg_float, \
+                                  cfg->isinverse);
+
+    /*
+    int ii;
+    printf("x=[");
+    for (ii=0; ii < num_points; ii++){
+        printf("%f+%fi;",(float)in_neon[ii*2],(float)in_neon[(ii*2)+1]);
+    }
+    printf("];\n");
+
+    printf("y=[");
+    for (ii=0; ii < num_points; ii++){
+        printf("%f+%fi;",(float)out_neon[ii*2],(float)out_neon[(ii*2)+1]);
+    }
+    printf("];\n");
+    */
 }
 
 #endif /* LV_HAVE_NEON */
