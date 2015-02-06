@@ -60,13 +60,12 @@ static inline void volk_32fc_fft_32fc_generic(lv_32fc_t* outVector, const lv_32f
 static inline void volk_32fc_fft_32fc_neon(lv_32fc_t* outVector, const lv_32fc_t* inVector, const fftarch* cfg, unsigned int num_points){
     ne10_float32_t* in_neon = (ne10_float32_t*) inVector;
     ne10_float32_t* out_neon = (ne10_float32_t*) outVector;  
-    const bool use_neon = (num_points % 4 == 0); // not actually faster
+    //const bool use_neon = (num_points % 4 == 0); // not actually faster
 
     ne10_fft_c2c_1d_float32_neon( (ne10_fft_cpx_float32_t*) out_neon, \
                                   (ne10_fft_cpx_float32_t*) in_neon, \
                                   cfg->neon_arch_cfg_float, \
                                   cfg->isinverse);
-
     /*
     int ii;
     printf("x=[");

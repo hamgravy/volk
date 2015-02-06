@@ -1,5 +1,5 @@
 /*
- *  Copyright 2013-14 ARM Limited and Contributors.
+ *  Copyright 2013-15 ARM Limited and Contributors.
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -293,8 +293,8 @@
 
         .ifeqs "\inverse", "TRUE"
         .ifeqs "\last_stage", "TRUE"
-        /* vld1.32         {d_one_by_nfft}, [sp] */
-        /* vdup.32         q_one_by_nfft, d_one_by_nfft[0] */
+        vld1.32         {d_one_by_nfft}, [sp]
+        vdup.32         q_one_by_nfft, d_one_by_nfft[0]
         .endif
         .endif
 
@@ -315,10 +315,10 @@
 
         .ifeqs "\inverse", "TRUE"
         .ifeqs "\last_stage", "TRUE"
-        /*vmul.f32        q_fout0, q_fout0, q_one_by_nfft */
-        /*vmul.f32        q_fout2, q_fout2, q_one_by_nfft */
-        /*vmul.f32        q_fout1, q_fout1, q_one_by_nfft */
-        /*vmul.f32        q_fout3, q_fout3, q_one_by_nfft */
+        vmul.f32        q_fout0, q_fout0, q_one_by_nfft
+        vmul.f32        q_fout2, q_fout2, q_one_by_nfft
+        vmul.f32        q_fout1, q_fout1, q_one_by_nfft
+        vmul.f32        q_fout3, q_fout3, q_one_by_nfft
         .endif
         .endif
 

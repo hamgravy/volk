@@ -41,6 +41,7 @@ void load_random_data(void *data, volk_type_t type, unsigned int n) {
     } else {
         float int_max = float(uint64_t(2) << (type.size*8));
         if(type.is_signed) int_max /= 2.0;
+        int_max /= 2.0; // ESB 
         for(unsigned int i=0; i<n; i++) {
             float scaled_rand = (((float) (rand() - (RAND_MAX/2))) / static_cast<float>((RAND_MAX/2))) * int_max;
             //man i really don't know how to do this in a more clever way, you have to cast down at some point

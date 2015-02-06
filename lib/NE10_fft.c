@@ -1,5 +1,5 @@
 /*
- *  Copyright 2014 ARM Limited and Contributors.
+ *  Copyright 2014-15 ARM Limited and Contributors.
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -173,6 +173,65 @@ static void ne10_fft_generate_twiddles_line_float32 (ne10_fft_cpx_float32_t * tw
     } // mstride
 }
 
+// Twiddles matrix [mstride][radix-1]
+// First column (k == 0)is ignored because phase == 1, and
+// twiddle = (1.0, 0.0).
+static void ne10_fft_generate_twiddles_line_int32 (ne10_fft_cpx_int32_t * twiddles,
+        const ne10_int32_t mstride,
+        const ne10_int32_t fstride,
+        const ne10_int32_t radix,
+        const ne10_int32_t nfft)
+{
+    ne10_int32_t j, k;
+    ne10_float32_t phase;
+    const ne10_float64_t pi = NE10_PI;
+
+    for (j = 0; j < mstride; j++)
+    {
+        for (k = 1; k < radix; k++) // phase = 1 when k = 0
+        {
+            phase = -2 * pi * fstride * k * j / nfft;
+
+            ne10_fft_cpx_int32_t *tw = &twiddles[mstride * (k - 1) + j];
+
+            tw->r = (ne10_int32_t) floor (0.5f + NE10_F2I32_MAX * cos(phase));
+            tw->i = (ne10_int32_t) floor (0.5f + NE10_F2I32_MAX * sin(phase));
+        } // radix
+    } // mstride
+}
+
+ne10_fft_cpx_int32_t* ne10_fft_generate_twiddles_int32 (ne10_fft_cpx_int32_t * twiddles,
+        const ne10_int32_t * factors,
+        const ne10_int32_t nfft )
+{
+    ne10_int32_t stage_count = factors[0];
+    ne10_int32_t fstride = factors[1];
+    ne10_int32_t mstride;
+    ne10_int32_t cur_radix; // current radix
+
+    // for first stage
+    cur_radix = factors[2 * stage_count];
+    if (cur_radix % 2) // current radix is not 4 or 2
+    {
+        twiddles += 1;
+        ne10_fft_generate_twiddles_line_int32 (twiddles, 1, fstride, cur_radix, nfft);
+        twiddles += cur_radix - 1;
+    }
+    stage_count--;
+
+    // for other stage
+    for (; stage_count > 0; stage_count--)
+    {
+        cur_radix = factors[2 * stage_count];
+        fstride /= cur_radix;
+        mstride = factors[2 * stage_count + 1];
+        ne10_fft_generate_twiddles_line_int32 (twiddles, mstride, fstride, cur_radix, nfft);
+        twiddles += mstride * (cur_radix - 1);
+    } // stage_count
+
+    return twiddles;
+}
+
 ne10_fft_cpx_float32_t* ne10_fft_generate_twiddles_float32 (ne10_fft_cpx_float32_t * twiddles,
         const ne10_int32_t * factors,
         const ne10_int32_t nfft )
@@ -228,6 +287,10 @@ ne10_fft_cfg_float32_t ne10_fft_alloc_c2c_float32_neon (ne10_int32_t nfft)
                               + NE10_FFT_BYTE_ALIGNMENT;     /* 64-bit alignment*/
 
     st = (ne10_fft_cfg_float32_t) NE10_MALLOC (memneeded);
+
+    // Only backward FFT is scaled by default.
+    st->is_forward_scaled = 0;
+    st->is_backward_scaled = 1;
 
     // Bad allocation.
     if (st == NULL)
@@ -300,5 +363,153 @@ ne10_fft_cfg_float32_t ne10_fft_alloc_c2c_float32_neon (ne10_int32_t nfft)
 }
 
 /**
+ * @brief User-callable function to allocate all necessary storage space for the fft.
+ * @param[in]   nfft             length of FFT
+ * @return      st               point to the FFT config memory. This memory is allocated with malloc.
+ * The function allocate all necessary storage space for the fft. It also factors out the length of FFT and generates the twiddle coeff.
+ */
+ne10_fft_cfg_int32_t ne10_fft_alloc_c2c_int32_neon (ne10_int32_t nfft)
+{
+    ne10_fft_cfg_int32_t st = NULL;
+    ne10_uint32_t memneeded = sizeof (ne10_fft_state_int32_t)
+                              + sizeof (ne10_int32_t) * (NE10_MAXFACTORS * 2) /* factors*/
+                              + sizeof (ne10_fft_cpx_int32_t) * nfft        /* twiddle*/
+                              + sizeof (ne10_fft_cpx_int32_t) * nfft        /* buffer*/
+                              + NE10_FFT_BYTE_ALIGNMENT;     /* 64-bit alignment*/
+
+    st = (ne10_fft_cfg_int32_t) NE10_MALLOC (memneeded);
+
+    // Bad allocation.
+    if (st == NULL)
+    {
+        return st;
+    }
+
+    uintptr_t address = (uintptr_t) st + sizeof (ne10_fft_state_int32_t);
+    NE10_BYTE_ALIGNMENT (address, NE10_FFT_BYTE_ALIGNMENT);
+    st->factors = (ne10_int32_t*) address;
+    st->twiddles = (ne10_fft_cpx_int32_t*) (st->factors + (NE10_MAXFACTORS * 2));
+    st->buffer = st->twiddles + nfft;
+
+    // st->last_twiddles is default NULL.
+    // Calling fft_c or fft_neon is decided by this pointers.
+    st->last_twiddles = NULL;
+
+    st->nfft = nfft;
+    if (nfft % NE10_FFT_PARA_LEVEL == 0)
+    {
+        // Size of FFT satisfies requirement of NEON optimization.
+        st->nfft /= NE10_FFT_PARA_LEVEL;
+        st->last_twiddles = st->twiddles + nfft / NE10_FFT_PARA_LEVEL;
+    }
+
+    ne10_int32_t result = ne10_factor (st->nfft, st->factors, NE10_FACTOR_DEFAULT);
+
+    // Can not factor.
+    if (result == NE10_ERR)
+    {
+        NE10_FREE (st);
+        return st;
+    }
+
+    // Check if radix-8 can be enabled
+    ne10_int32_t stage_count    = st->factors[0];
+    ne10_int32_t algorithm_flag = st->factors[2 * (stage_count + 1)];
+
+    // Enable radix-8.
+    if (algorithm_flag == NE10_FFT_ALG_ANY)
+    {
+        result = ne10_factor (st->nfft, st->factors, NE10_FACTOR_EIGHT);
+        if (result == NE10_ERR)
+        {
+            NE10_FREE (st);
+            return st;
+        }
+        ne10_fft_generate_twiddles_int32 (st->twiddles, st->factors, st->nfft);
+    }
+    else
+    {
+        st->last_twiddles = NULL;
+        st->nfft = nfft;
+        result = ne10_factor (st->nfft, st->factors, NE10_FACTOR_DEFAULT);
+        ne10_fft_generate_twiddles_int32 (st->twiddles, st->factors, st->nfft);
+        return st;
+    }
+
+    // Generate super twiddles for the last stage.
+    if (nfft % NE10_FFT_PARA_LEVEL == 0)
+    {
+        // Size of FFT satisfies requirement of NEON optimization.
+        ne10_fft_generate_twiddles_line_int32 (st->last_twiddles,
+                st->nfft,
+                1,
+                NE10_FFT_PARA_LEVEL,
+                nfft);
+    }
+    return st;
+}
+
+/**
+ * @defgroup C2C_FFT_IFFT_DESTROY Float/Fixed point Complex FFT Destroy functions
+ * @brief User-callable function to destroy all necessary storage space for the fft.
+ * @param[in]   cfg     point to the FFT config memory. This memory is allocaed with malloc by Ne10.
+ * @{
+ */
+
+void ne10_fft_destroy_c2c_float32 (ne10_fft_cfg_float32_t cfg)
+{
+    free(cfg);
+}
+
+void ne10_fft_destroy_c2c_int32 (ne10_fft_cfg_int32_t cfg)
+{
+    free (cfg);
+}
+
+void ne10_fft_destroy_c2c_int16 (ne10_fft_cfg_int16_t cfg)
+{
+    free (cfg);
+}
+
+/**
+ * @}
+ */ //end of C2C_FFT_IFFT_DESTROY group
+
+/**
  * @}
  */ //end of C2C_FFT_IFFT group
+
+/**
+ * @addtogroup R2C_FFT_IFFT
+ * @{
+ */
+
+/**
+ * @defgroup R2C_FFT_IFFT_DESTROY Float/Fixed point Real2Complex FFT Destroy functions
+ * @brief User-callable function to destroy all necessary storage space for the fft.
+ * @param[in]   cfg     point to the FFT config memory. This memory is allocaed with malloc by Ne10.
+ * @{
+ */
+
+void ne10_fft_destroy_r2c_float32 (ne10_fft_r2c_cfg_float32_t cfg)
+{
+    free(cfg);
+}
+
+void ne10_fft_destroy_r2c_int32 (ne10_fft_r2c_cfg_int32_t cfg)
+{
+    free (cfg);
+}
+
+void ne10_fft_destroy_r2c_int16 (ne10_fft_r2c_cfg_int16_t cfg)
+{
+    free (cfg);
+}
+
+/**
+ * @}
+ */ //end of R2C_FFT_IFFT_DESTROY group
+
+/**
+ * @}
+ */ //end of R2C_FFT_IFFT group

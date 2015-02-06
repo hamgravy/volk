@@ -179,34 +179,42 @@ int main(int argc, char *argv[]) {
     // Run tests
     std::vector<volk_test_results_t> results;
     
-    const int sizes[13]={4,16,32,64,128,256,512,1024,2048,4096,8192,16384,32768};
+    
     const unsigned int points = 33554432*4;
     int iterations;
-    /*
+
+    /*   
     iterations = 2;    
-    VOLK_FFT_PROFILE(volk_32fc_fft_32fc,  5e-5, 0, 16, FORWARDFFT, iterations, &results, benchmark_mode, kernel_regex);
-    VOLK_FFT_PROFILE(volk_32fc_fft_32fc,  5e-5, 0, 16, INVERSEFFT, iterations, &results, benchmark_mode, kernel_regex);
+    VOLK_FFT_PROFILE(volk_32fc_fft_32fc,  5e-5, 0, 96, FORWARDFFT, iterations, &results, benchmark_mode, kernel_regex);
+    VOLK_FFT_PROFILE(volk_32fc_fft_32fc,  5e-5, 0, 96, INVERSEFFT, iterations, &results, benchmark_mode, kernel_regex);
     
-    VOLK_FFT_PROFILE(volk_32ic_fft_32ic,  32,   0, 16, FORWARDFFT, iterations, &results, benchmark_mode, kernel_regex);
-    VOLK_FFT_PROFILE(volk_32ic_fft_32ic,  32,   0, 16, INVERSEFFT, iterations, &results, benchmark_mode, kernel_regex);
+    VOLK_FFT_PROFILE(volk_32ic_fft_32ic,  128,   0, 128, FORWARDFFT, iterations, &results, benchmark_mode, kernel_regex);
+    VOLK_FFT_PROFILE(volk_32ic_fft_32ic,  128,   0, 128, INVERSEFFT, iterations, &results, benchmark_mode, kernel_regex);
     
-    VOLK_FFT_PROFILE(volk_16ic_fft_16ic,  32,   0, 16, FORWARDFFT, iterations, &results, benchmark_mode, kernel_regex);
-    VOLK_FFT_PROFILE(volk_16ic_fft_16ic,  32,   0, 16, INVERSEFFT, iterations, &results, benchmark_mode, kernel_regex);
-    */
-    BOOST_FOREACH(int size, sizes){
+    VOLK_FFT_PROFILE(volk_16ic_fft_16ic,  32,   0, 128, FORWARDFFT, iterations, &results, benchmark_mode, kernel_regex);
+    VOLK_FFT_PROFILE(volk_16ic_fft_16ic,  32,   0, 128, INVERSEFFT, iterations, &results, benchmark_mode, kernel_regex);
+    */ 
+
+    const int pow2sizes[12]={16,32,64,128,256,512,1024,2048,4096,8192,16384,32768};
+    const int sizes[8]=    {24,36,96,160,192,384,768,1280};
+
+    BOOST_FOREACH(int size, pow2sizes){
         iterations = points/size;
-        
         VOLK_FFT_PROFILE(volk_32fc_fft_32fc,  5e-5, 0, size, FORWARDFFT, iterations, &results, benchmark_mode, kernel_regex);
         VOLK_FFT_PROFILE(volk_32fc_fft_32fc,  5e-5, 0, size, INVERSEFFT, iterations, &results, benchmark_mode, kernel_regex);
                 
-        VOLK_FFT_PROFILE(volk_32ic_fft_32ic,  32,   0, size, FORWARDFFT, iterations, &results, benchmark_mode, kernel_regex);
-        VOLK_FFT_PROFILE(volk_32ic_fft_32ic,  32,   0, size, INVERSEFFT, iterations, &results, benchmark_mode, kernel_regex);
+        VOLK_FFT_PROFILE(volk_32ic_fft_32ic,  128,   0, size, FORWARDFFT, iterations, &results, benchmark_mode, kernel_regex);
+        VOLK_FFT_PROFILE(volk_32ic_fft_32ic,  128,   0, size, INVERSEFFT, iterations, &results, benchmark_mode, kernel_regex);
         
         VOLK_FFT_PROFILE(volk_16ic_fft_16ic,  32,   0, size, FORWARDFFT, iterations, &results, benchmark_mode, kernel_regex);
         VOLK_FFT_PROFILE(volk_16ic_fft_16ic,  32,   0, size, INVERSEFFT, iterations, &results, benchmark_mode, kernel_regex);
     } 
-       
-
+    
+    BOOST_FOREACH(int size, sizes){
+        iterations = points/size;
+        VOLK_FFT_PROFILE(volk_32fc_fft_32fc,  5e-5, 0, size, FORWARDFFT, iterations, &results, benchmark_mode, kernel_regex);
+        VOLK_FFT_PROFILE(volk_32fc_fft_32fc,  5e-5, 0, size, INVERSEFFT, iterations, &results, benchmark_mode, kernel_regex);
+    }
 
     if(vm.count("json")) {
         write_json(json_file, results);

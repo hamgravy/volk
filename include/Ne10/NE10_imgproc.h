@@ -1,5 +1,5 @@
 /*
- *  Copyright 2013-14 ARM Limited and Contributors.
+ *  Copyright 2013-15 ARM Limited and Contributors.
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -89,6 +89,7 @@ extern "C" {
                                         ne10_uint32_t src_width,
                                         ne10_uint32_t src_height,
                                         ne10_int32_t angle);
+#ifdef ENABLE_NE10_IMG_ROTATE_RGBA_NEON
     /* NEON version*/
     extern void ne10_img_rotate_rgba_neon (ne10_uint8_t* dst,
                                            ne10_uint32_t* dst_width,
@@ -98,6 +99,7 @@ extern "C" {
                                            ne10_uint32_t src_height,
                                            ne10_int32_t angle)
     asm ("ne10_img_rotate_rgba_neon");
+#endif // ENABLE_NE10_IMG_ROTATE_RGBA_NEON
 
     /* image boxfilter functions */
     /* function pointers */

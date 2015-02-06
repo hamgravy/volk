@@ -502,6 +502,10 @@ if(NOT CPU_IS_x86)
 
     #list(APPEND volk_sources NE10_mask_table.c)
     list(APPEND volk_sources NE10_fft_generic_float32.neonintrinsic.cpp)
+
+    list(APPEND volk_sources NE10_fft_generic_int32.cpp)
+
+
 endif()
 
 ########################################################################

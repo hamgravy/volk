@@ -59,6 +59,7 @@ if(NOT CPU_IS_x86)
     list(APPEND volk_fft_profile_sources ${CMAKE_SOURCE_DIR}/lib/NE10_fft.c)
     list(APPEND volk_fft_profile_sources ${CMAKE_SOURCE_DIR}/lib/NE10_fft_int32.c)
     list(APPEND volk_fft_profile_sources ${CMAKE_SOURCE_DIR}/lib/NE10_fft_int16.c)
+    list(APPEND volk_fft_profile_sources ${CMAKE_SOURCE_DIR}/lib/NE10_fft_generic_int32.cpp)
 endif()
 
 add_executable(volk_fft_profile ${volk_fft_profile_sources})

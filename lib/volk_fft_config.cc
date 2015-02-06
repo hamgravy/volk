@@ -41,11 +41,13 @@ void fftalloc(fftarch* fft_conf, const char* arch, const volk_fft_inputsig* inpu
         if (inputsig->is_float){ 
             //printf("allocating neon float32\n");
             fft_conf->neon_arch_cfg_float = ne10_fft_alloc_c2c_float32_neon(vlen);
+            fft_conf->neon_arch_cfg_float->is_forward_scaled = true;
+            fft_conf->neon_arch_cfg_float->is_backward_scaled = true;
             //printf("allocated neon float32\n");
         }else{
             if (inputsig->size == 4){
                 //printf("allocating neon int32\n");
-                fft_conf->neon_arch_cfg_int32 = ne10_fft_alloc_c2c_int32(vlen);
+                fft_conf->neon_arch_cfg_int32 = ne10_fft_alloc_c2c_int32_neon(vlen);
                 //printf("allocated neon int32\n");
             }else if (inputsig->size == 2){
                 //printf("allocating neon int16\n");
